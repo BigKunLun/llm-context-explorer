@@ -1,0 +1,70 @@
+// src/components/ContextViewer.tsx
+import type { ContextMessage, MessageRole } from '../types';
+
+const roleLabels: Record<MessageRole, { label: string; color: string }> = {
+  system: { label: 'System', color: 'bg-gray-600 text-gray-200' },
+  user: { label: 'User', color: 'bg-blue-600 text-blue-100' },
+  assistant: { label: 'Assistant', color: 'bg-green-600 text-green-100' },
+  tool_call: { label: 'Tool Call', color: 'bg-purple-600 text-purple-100' },
+  tool_result: { label: 'Tool Result', color: 'bg-amber-600 text-amber-100' },
+};
+
+interface ContextViewerProps {
+  messages: ContextMessage[];
+  tokens: { used: number; limit: number };
+}
+
+export function ContextViewer({ messages, tokens }: ContextViewerProps) {
+  const tokenPercentage = (tokens.used / tokens.limit) * 100;
+
+  return (
+    <div>
+      {/* Token 统计 */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+          当前上下文
+        </h3>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-400">
+            Tokens: <span className="text-white font-mono">{tokens.used}</span> / {tokens.limit}
+          </span>
+          <div className="w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all ${
+                tokenPercentage > 80 ? 'bg-red-500' : tokenPercentage > 50 ? 'bg-yellow-500' : 'bg-green-500'
+              }`}
+              style={{ width: `${Math.min(tokenPercentage, 100)}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 消息列表 */}
+      <div className="bg-gray-800/50 rounded-lg border border-gray-700 divide-y divide-gray-700/50">
+        {messages.map((msg, index) => {
+          const roleStyle = roleLabels[msg.role];
+          return (
+            <div
+              key={index}
+              className={`p-3 ${msg.isNew ? 'bg-blue-500/10 border-l-2 border-blue-500' : ''}`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`px-2 py-0.5 rounded text-xs font-medium ${roleStyle.color}`}>
+                  {roleStyle.label}
+                </span>
+                {msg.isNew && (
+                  <span className="px-1.5 py-0.5 rounded text-xs bg-blue-500 text-white">
+                    NEW
+                  </span>
+                )}
+              </div>
+              <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono break-all">
+                {msg.content}
+              </pre>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
