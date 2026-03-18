@@ -62,10 +62,10 @@ export interface PlaybackState {
 }
 
 export const SPEED_MAP: Record<PlaybackSpeed, number> = {
-  0.5: 3000,
-  1: 1500,
-  1.5: 1000,
-  2: 750,
+  0.5: 3000,  // 单步间隔 3 秒
+  1: 1500,    // 单步间隔 1.5 秒
+  1.5: 1000,  // 单步间隔 1 秒
+  2: 750,      // 单步间隔 0.75 秒
 };
 
 // === Agent 状态相关 ===
@@ -83,9 +83,40 @@ export const AGENT_STATUS_CONFIG: Record<AgentStatus, { icon: string; text: stri
   observing: { icon: '👁️', text: '观察结果中...', color: 'emerald-500' },
   answering: { icon: '💬', text: '生成回答中...', color: 'amber-500' },
 };
+
+// === 场景相关 ===
+export interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  steps: Step[];
+}
+
+export interface Step {
+  id: string;
+  type: 'THOUGHT' | 'ACTION' | 'OBSERVATION' | 'ANSWER';
+  title: string;
+  description: string;
+  /** 该步骤结束时的完整上下文快照 */
+  contextSnapshot: ContextMessage[];
+  /** 该步骤新增的上下文内容（用于动画） */
+  contextDiff: ContextMessage[];
+  /** token 统计 */
+  tokens: {
+    used: number;
+    limit: number;
+  };
+}
+
+export interface ContextMessage {
+  role: 'system' | 'user' | 'assistant' | 'tool_call' | 'tool_result';
+  content: string;
+  /** 是否为当前步骤新增（用于高亮） */
+  isNew?: boolean;
+}
 ```
 
-### 2.3 App 状态管理
+### 2.4 App 状态管理
 
 ```typescript
 // App 持有
@@ -100,9 +131,13 @@ const [agentState, setAgentState] = useState<AgentState>({
   status: 'idle',
   message: '',
 });
+
+const [animatingIndices, setAnimatingIndices] = useState<Set<number>>(new Set());
 ```
 
-### 2.3 播放流程
+---
+
+## 三、播放流程
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -282,6 +317,7 @@ interface TimelineProps {
   onSelect: (index: number) => void;
   playbackMode?: boolean; // 是否处于播放模式
   isPlaybackActive?: boolean; // 播放是否正在进行（用于处理点击冲突）
+  onPlaybackStop?: () => void; // 播放中手动跳转时停止播放
 }
 ```
 
@@ -372,7 +408,7 @@ function usePlayback(scenario: Scenario, onStepComplete: () => void) {
   }, []);
 
   const startPlayback = (speed: PlaybackSpeed) => {
-    const interval = SPEED_MAP[speed];
+    const interval = SPEED_MAP[speed]; // 使用预定义的间隔时间
     timerRef.current = setInterval(() => {
       executeNextStepAnimation();
     }, interval);
@@ -385,6 +421,16 @@ function usePlayback(scenario: Scenario, onStepComplete: () => void) {
     }
   };
 
+  // 触发消息进场动画
+  const triggerMessageAnimations = (diff: ContextMessage[]) => {
+    // 计算新增消息在完整上下文中的索引
+    const baseIndex = scenario.steps[currentStepIndex].contextSnapshot.length - diff.length;
+    const newIndices = diff.map((_, i) => baseIndex + i);
+
+    // 将新消息索引加入动画状态
+    setAnimatingIndices(new Set(newIndices));
+  };
+
   // 执行下一步动画
   const executeNextStepAnimation = () => {
     const step = scenario.steps[currentStepIndex];
@@ -393,20 +439,20 @@ function usePlayback(scenario: Scenario, onStepComplete: () => void) {
     triggerMessageAnimations(step.contextDiff);
 
     // 2. 动画完成后触发回调
+    // 延迟时间由 SPEED_MAP 控制，确保动画完整播放
     setTimeout(() => {
       onStepComplete();
-    }, getAnimationDelay(speed));
+    }, SPEED_MAP[speed] * 0.5); // 动画在单步间隔的一半时间完成
   };
 
-  // 根据速度计算动画延迟
-  const getAnimationDelay = (speed: PlaybackSpeed): number => {
-    const baseDelay = 800; // 基础动画时长
-    return baseDelay / speed;
-  };
-
-  return { startPlayback, stopPlayback };
+  return { startPlayback, stopPlayback, triggerMessageAnimations };
 }
 ```
+
+**说明**：
+- `SPEED_MAP` 控制单步之间的间隔时间（决定播放节奏）
+- `SPEED_MAP[speed] * 0.5` 控制动画在单步间隔内的完成时间（确保动画有足够时间播放完）
+- 例如 1x 速度：单步间隔 1500ms，动画 750ms 内完成
 
 ---
 
