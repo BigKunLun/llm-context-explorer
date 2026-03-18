@@ -1,5 +1,14 @@
 // src/data/scenarios.ts
-import type { Scenario, Step, ContextMessage } from '../types';
+import type {
+  Scenario,
+  Step,
+  ContextMessage,
+  PlaybackMode,
+  PlaybackSpeed,
+  PlaybackState,
+  AgentStatus,
+  AgentState,
+} from '../types';
 
 /** 系统消息模板 */
 const SYSTEM_MESSAGE: ContextMessage = {
