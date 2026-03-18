@@ -6,6 +6,28 @@ body {
 
 /* ==================== 上下文消息动画 ==================== */
 
+/* 滑入动画 */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 高亮动画 */
+@keyframes highlight {
+  0% {
+    background-color: rgba(59, 130, 246, 0.3);
+  }
+  100% {
+    background-color: rgba(59, 130, 246, 0);
+  }
+}
+
 /* 消息淡入动画 */
 @keyframes messageFadeIn {
   from {
@@ -33,19 +55,26 @@ body {
 
 /* 消息容器 */
 .context-message {
-  animation: messageFadeIn 0.3s ease-out;
+  animation: slideIn 0.3s ease-out;
   transition: all 0.3s ease;
 }
 
 .context-message.is-new {
   animation:
-    messageFadeIn 0.4s ease-out,
+    slideIn 0.4s ease-out,
     highlightPulse 2s ease-out;
+}
+
+/* 新消息高亮类 */
+.context-message-new {
+  animation:
+    slideIn 0.4s ease-out,
+    highlight 1.5s ease-out forwards;
 }
 
 /* 消息内容 */
 .context-message-content {
-  animation: messageFadeIn 0.4s ease-out 0.1s both;
+  animation: slideIn 0.4s ease-out 0.1s both;
 }
 
 /* Token 进度条动画 */
