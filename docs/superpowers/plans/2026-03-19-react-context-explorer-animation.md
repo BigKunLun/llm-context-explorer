@@ -125,22 +125,14 @@ git commit -m "feat: 添加播放控制和 Agent 状态类型定义"
 - [ ] **Step 3: 添加新消息动画类**
 
 ```css
-.context-message.new {
+.context-message-new {
   animation:
     slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1),
     highlight 1s ease-in-out;
 }
 ```
 
-- [ ] **Step 4: 验证样式生效**
-
-```bash
-npm run dev
-```
-
-Expected: 动画类名可以被 Tailwind @apply 或直接使用
-
-- [ ] **Step 5: Commit 动画样式**
+- [ ] **Step 4: Commit 动画样式**
 
 ```bash
 git add src/styles/index.css
@@ -193,15 +185,7 @@ export function AgentStatusBar({ status, message, tokens }: AgentStatusBarProps)
 }
 ```
 
-- [ ] **Step 2: 验证组件渲染**
-
-```bash
-npm run dev
-```
-
-Expected: 状态栏正确显示不同状态的图标和颜色
-
-- [ ] **Step 3: Commit 组件**
+- [ ] **Step 2: Commit 组件**
 
 ```bash
 git add src/components/AgentStatusBar.tsx
@@ -308,15 +292,7 @@ export function PlaybackBar({
 }
 ```
 
-- [ ] **Step 2: 验证组件渲染**
-
-```bash
-npm run dev
-```
-
-Expected: 播放条控制按钮、进度条、速度选择器正常工作
-
-- [ ] **Step 3: Commit 组件**
+- [ ] **Step 2: Commit 组件**
 
 ```bash
 git add src/components/PlaybackBar.tsx
@@ -337,28 +313,17 @@ git commit -m "feat: 添加 PlaybackBar 组件"
 - [ ] **Step 1: 添加动画相关 Props**
 
 ```tsx
-// src/components/ContextViewer.tsx
-// 添加到现有 interface ContextViewerProps
+// src/components/ContextViewer.tsx - 添加到现有 interface ContextViewerProps
 animateMode?: boolean; // 控制是否启用动画
 animatingIndices?: Set<number>; // 正在播放动画的消息索引
 onAnimationComplete?: (index: number) => void; // 动画完成回调
 ```
 
-- [ ] **Step 2: 更新消息渲染添加动画类名**
-
-```tsx
-// src/components/ContextViewer.tsx - 在消息 div 上添加条件类名
-<div
-  key={index}
-  className={`p-3 ${getAnimationClassName(index)}`}
-  onAnimationEnd={() => handleAnimationEnd(index)}
->
-```
-
-- [ ] **Step 3: 添加动画类名计算函数**
+- [ ] **Step 2: 添加动画类名计算函数**
 
 ```tsx
 // src/components/ContextViewer.tsx - 添加组件内函数
+
 const getAnimationClassName = (index: number): string => {
   if (!animateMode) return '';
   if (animatingIndices?.has(index)) {
@@ -372,15 +337,18 @@ const handleAnimationEnd = (index: number) => {
 };
 ```
 
-- [ ] **Step 4: 测试动画效果**
+- [ ] **Step 3: 更新消息渲染添加动画类名和事件**
 
-```bash
-npm run dev
+```tsx
+// src/components/ContextViewer.tsx - 在消息 div 上添加条件类名和事件
+<div
+  key={index}
+  onAnimationEnd={() => handleAnimationEnd(index)}
+  className={`p-3 ${getAnimationClassName(index)}`}
+>
 ```
 
-Expected: 新消息从右侧滑入，有高亮闪烁
-
-- [ ] **Step 5: Commit 修改**
+- [ ] **Step 4: Commit 修改**
 
 ```bash
 git add src/components/ContextViewer.tsx
@@ -399,59 +367,22 @@ git commit -m "feat: ContextViewer 支持消息进场动画"
 - [ ] **Step 1: 添加播放模式 Props**
 
 ```tsx
-// src/components/StepCard.tsx
-interface StepCardProps {
-  step: Step;
-  index: number;
-  isActive: boolean;
-  isPlaying?: boolean; // 是否处于播放模式
-  onClick: () => void;
-}
+// src/components/StepCard.tsx - 添加到 interface StepCardProps
+isPlaying?: boolean; // 是否处于播放模式
 ```
 
 - [ ] **Step 2: 更新样式以支持播放模式**
 
 ```tsx
-// src/components/StepCard.tsx
-const stepTypeStyles: Record<Step['type'], { bg: string; text: string; icon: string }> = {
-  THOUGHT: { bg: 'bg-violet-500/20', text: 'text-violet-400', icon: '🧠' },
-  ACTION: { bg: 'bg-sky-500/20', text: 'text-sky-400', icon: '⚡' },
-  OBSERVATION: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: '👁️' },
-  ANSWER: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: '💬' },
-};
-
-export function StepCard({ step, index, isActive, isPlaying, onClick }: StepCardProps) {
-  const style = stepTypeStyles[step.type];
-
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        w-full text-left p-3 rounded-xl border transition-all
-        ${isActive
-          ? 'bg-slate-800 border-indigo-500 ring-1 ring-indigo-500'
-          : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
-        }
-        ${isPlaying && !isActive ? 'opacity-50' : ''}
-      `}
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <span className={`px-2 py-0.5 rounded text-xs font-medium ${style.bg} ${style.text}`}>
-          {style.icon} {step.type}
-        </span>
-        <span className="text-xs text-slate-500">#{index + 1}</span>
-      </div>
-      <div className="text-sm font-medium text-slate-100 truncate">
-        {step.title}
-      </div>
-      <div className="flex items-center gap-2 mt-1">
-        <span className="text-xs text-slate-500">
-          Tokens: {step.tokens.used}
-        </span>
-      </div>
-    </button>
-  );
-}
+// src/components/StepCard.tsx - 更新 className 添加播放模式条件
+className={`
+  w-full text-left p-3 rounded-xl border transition-all
+  ${isActive
+    ? 'bg-slate-800 border-indigo-500 ring-1 ring-indigo-500'
+    : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
+  }
+  ${isPlaying && !isActive ? 'opacity-50' : ''}
+`}
 ```
 
 - [ ] **Step 3: Commit 修改**
@@ -473,53 +404,23 @@ git commit -m "feat: StepCard 支持播放模式"
 - [ ] **Step 1: 添加播放模式 Props**
 
 ```tsx
-// src/components/Timeline.tsx
-interface TimelineProps {
-  steps: Step[];
-  currentIndex: number;
-  onSelect: (index: number) => void;
-  playbackMode?: boolean; // 是否处于播放模式
-  isPlaybackActive?: boolean; // 播放是否正在进行
-  onPlaybackStop?: () => void; // 播放中手动跳转时停止播放
-}
+// src/components/Timeline.tsx - 添加到 interface TimelineProps
+playbackMode?: boolean; // 是否处于播放模式
+isPlaybackActive?: boolean; // 播放是否正在进行（用于处理点击冲突）
+onPlaybackStop?: () => void; // 播放中手动跳转时停止播放
 ```
 
 - [ ] **Step 2: 处理播放/点击冲突**
 
 ```tsx
-// src/components/Timeline.tsx
-export function Timeline({ steps, currentIndex, onSelect, playbackMode, isPlaybackActive, onPlaybackStop }: TimelineProps) {
-  const handleStepSelect = (index: number) => {
-    // 如果正在播放，先停止播放
-    if (isPlaybackActive && onPlaybackStop) {
-      onPlaybackStop();
-    }
-    onSelect(index);
-  };
-
-  return (
-    <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
-        执行时间线
-      </h3>
-      {steps.map((step, index) => (
-        <div key={step.id} className="relative">
-          {/* 连接线 */}
-          {index < steps.length - 1 && (
-            <div className="absolute left-6 top-14 w-0.5 h-2 bg-slate-700" />
-          )}
-          <StepCard
-            step={step}
-            index={index}
-            isActive={index === currentIndex}
-            isPlaying={playbackMode}
-            onClick={() => handleStepSelect(index)}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
+// src/components/Timeline.tsx - 更新 handleStepSelect 函数
+const handleStepSelect = (index: number) => {
+  // 如果正在播放，先停止播放
+  if (isPlaybackActive && onPlaybackStop) {
+    onPlaybackStop();
+  }
+  onSelect(index);
+};
 ```
 
 - [ ] **Step 3: Commit 修改**
@@ -541,80 +442,25 @@ git commit -m "feat: Timeline 支持播放模式和冲突处理"
 - [ ] **Step 1: 添加播放模式 Props**
 
 ```tsx
-// src/components/StepDetail.tsx
-interface StepDetailProps {
-  step: Step;
-  stepIndex: number;
-  totalSteps: number;
-  onPrev: () => void;
-  onNext: () => void;
-  isPlaying?: boolean; // 播放模式下禁用手动导航
-  animateMode?: boolean; // 是否启用动画
-}
+// src/components/StepDetail.tsx - 添加到 interface StepDetailProps
+isPlaying?: boolean; // 播放模式下禁用手动导航
+animateMode?: boolean; // 是否启用动画
 ```
 
 - [ ] **Step 2: 传递 Props 给子组件**
 
 ```tsx
-// src/components/StepDetail.tsx
-export function StepDetail({ step, stepIndex, totalSteps, onPrev, onNext, isPlaying, animateMode }: StepDetailProps) {
-  const style = stepTypeLabels[step.type];
+// src/components/StepDetail.tsx - 传递 props 给 ContextViewer
+<ContextViewer
+  messages={step.contextSnapshot}
+  tokens={step.tokens}
+  animateMode={animateMode}
+/>
 
-  return (
-    <div className="h-full flex flex-col">
-      {/* 头部 */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-2xl">{style.icon}</span>
-          <h2 className={`text-xl font-bold ${style.color}`}>
-            Step {stepIndex + 1}: {style.label}
-          </h2>
-        </div>
-        <h3 className="text-lg text-slate-100 font-medium">{step.title}</h3>
-      </div>
-
-      {/* 上下文查看器 */}
-      <div className="flex-1 mb-6 overflow-auto">
-        <ContextViewer
-          messages={step.contextSnapshot}
-          tokens={step.tokens}
-          animateMode={animateMode}
-        />
-      </div>
-
-      {/* 本步解析 */}
-      <div className="mb-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
-        <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
-          📝 本步解析
-        </h4>
-        <p className="text-slate-300 leading-relaxed">{step.description}</p>
-      </div>
-
-      {/* 导航按钮 - 播放模式下隐藏或禁用 */}
-      {!isPlaying && (
-        <div className="flex justify-between">
-          <button
-            onClick={onPrev}
-            disabled={stepIndex === 0}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:text-slate-500 rounded-lg transition-colors"
-          >
-            ← 上一步
-          </button>
-          <span className="text-slate-500 self-center">
-            {stepIndex + 1} / {totalSteps}
-          </span>
-          <button
-            onClick={onNext}
-            disabled={stepIndex === totalSteps - 1}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:text-slate-500 rounded-lg transition-colors"
-          >
-            下一步 →
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
+// 播放模式下隐藏或禁用手动导航按钮
+{!isPlaying && (
+  // 现有导航按钮
+)}
 ```
 
 - [ ] **Step 3: Commit 修改**
@@ -638,7 +484,7 @@ git commit -m "feat: StepDetail 支持播放模式"
 - [ ] **Step 1: 添加播放状态导入和初始化**
 
 ```tsx
-// src/App.tsx
+// src/App.tsx - 添加导入
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { scenarios, getScenarioById } from './data/scenarios';
 import { ScenarioSelect } from './components/ScenarioSelect';
@@ -649,44 +495,35 @@ import { PlaybackBar } from './components/PlaybackBar';
 import type { PlaybackState, PlaybackSpeed, PlaybackMode, AgentStatus } from './types';
 import { SPEED_MAP, AGENT_STATUS_CONFIG } from './types';
 
-function App() {
-  const [scenarioId, setScenarioId] = useState(scenarios[0].id);
-  const [stepIndex, setStepIndex] = useState(0);
-  const [animateMode, setAnimateMode] = useState(false);
-
-  // 播放状态
-  const [playback, setPlayback] = useState<PlaybackState>({
-    mode: 'stopped',
-    speed: 1,
-    currentStepIndex: 0,
-    isAnimating: false,
-  });
-
-  // Agent 状态
-  const [agentStatus, setAgentStatus] = useState<AgentStatus>('idle');
-  const [agentMessage, setAgentMessage] = useState('');
-
-  // 动画中消息索引
-  const [animatingIndices, setAnimatingIndices] = useState<Set<number>>(new Set());
-
-  const timerRef = useRef<NodeJS.Timeout>();
+// 添加状态初始化
+const [animateMode, setAnimateMode] = useState(false);
+const [playback, setPlayback] = useState<PlaybackState>({
+  mode: 'stopped',
+  speed: 1,
+  currentStepIndex: 0,
+  isAnimating: false,
+});
+const [agentStatus, setAgentStatus] = useState<AgentStatus>('idle');
+const [agentMessage, setAgentMessage] = useState('');
+const [animatingIndices, setAnimatingIndices] = useState<Set<number>>(new Set());
+const timerRef = useRef<NodeJS.Timeout>();
 ```
 
 - [ ] **Step 2: 添加播放控制函数**
 
 ```tsx
-// src/App.tsx - 添加到组件内
+// src/App.tsx - 添加播放控制函数
 
 const currentScenario = useMemo(() => getScenarioById(scenarioId), [scenarioId]);
 const currentStep = currentScenario?.steps[stepIndex];
 
-// 处理场景切换
+// 场景切换
 const handleScenarioChange = useCallback((id: string) => {
   setScenarioId(id);
   setStepIndex(0);
   stopPlayback();
   setAnimateMode(false);
-}, []);
+}, [stopPlayback]);
 
 // 手动步骤选择
 const handleStepSelect = useCallback((index: number) => {
@@ -707,21 +544,21 @@ const handlePrev = useCallback(() => {
     stopPlayback();
     setStepIndex(stepIndex - 1);
   }
-}, [stepIndex]);
+}, [stepIndex, stopPlayback]);
 
 const handleNext = useCallback(() => {
   if (currentScenario && stepIndex < currentScenario.steps.length - 1) {
     stopPlayback();
     setStepIndex(stepIndex + 1);
   }
-}, [stepIndex, currentScenario]);
+}, [stepIndex, currentScenario, stopPlayback]);
 
 const handleSeek = useCallback((progress: number) => {
   stopPlayback();
   const targetIndex = Math.floor(progress * (currentScenario?.steps.length || 0));
   setStepIndex(targetIndex);
   setAnimatingIndices(new Set());
-}, [currentScenario]);
+}, [currentScenario, stopPlayback]);
 
 const handleSpeedChange = useCallback((speed: PlaybackSpeed) => {
   setPlayback(prev => ({ ...prev, speed }));
@@ -743,11 +580,11 @@ const startPlayback = useCallback(() => {
   setAgentStatus('thinking');
   setAgentMessage('分析用户请求...');
 
-  // 使用 setTimeout 而非立即执行，确保状态更新
+  // 延迟执行第一步，确保状态更新
   setTimeout(() => {
     triggerStepAnimation(stepIndex);
   }, 0);
-}, [currentScenario, stepIndex]);
+}, [currentScenario, stepIndex, triggerStepAnimation]);
 
 const stopPlayback = useCallback(() => {
   if (timerRef.current) {
@@ -766,7 +603,6 @@ const triggerStepAnimation = useCallback((stepIndexToExecute: number) => {
 
   const step = currentScenario.steps[stepIndexToExecute];
   if (!step) {
-    // 播放完成
     stopPlayback();
     return;
   }
@@ -792,7 +628,6 @@ const triggerStepAnimation = useCallback((stepIndexToExecute: number) => {
   const animationDuration = SPEED_MAP[playback.speed] * 0.5;
   timerRef.current = setTimeout(() => {
     setAnimatingIndices(new Set());
-    // 使用回调而非直接递归，避免状态更新问题
     const nextIndex = stepIndexToExecute + 1;
     if (nextIndex < currentScenario.steps.length) {
       triggerStepAnimation(nextIndex);
@@ -800,27 +635,22 @@ const triggerStepAnimation = useCallback((stepIndexToExecute: number) => {
       stopPlayback();
     }
   }, animationDuration);
-}, [currentScenario, playback.speed, playback.isAnimating, stepIndex]);
+}, [currentScenario, playback.speed, playback.isAnimating]);
 ```
 
 - [ ] **Step 4: 添加 useEffect 监听 stepIndex 变化**
 
 ```tsx
-// src/App.tsx - 添加组件顶部（在其他 hooks 之后）
+// src/App.tsx - 添加 useEffect 监听 stepIndex（在其他 hooks 之后）
 
-// 监听 stepIndex 变化，触发对应步骤动画（播放时）
+// 监听 stepIndex 变化，播放时触发对应步骤动画
 useEffect(() => {
   if (animateMode && playback.mode === 'playing' && currentScenario) {
     triggerStepAnimation(stepIndex);
   }
-}, [stepIndex, animateMode, playback.mode]);
-```
+}, [stepIndex, animateMode, playback.mode, currentScenario]);
 
-- [ ] **Step 5: 清理定时器**
-
-```tsx
-// src/App.tsx - 添加组件顶部 cleanup
-
+// 清理定时器
 useEffect(() => {
   return () => {
     if (timerRef.current) {
@@ -830,158 +660,22 @@ useEffect(() => {
 }, []);
 ```
 
-- [ ] **Step 4: 更新 JSX 结构**
+- [ ] **Step 5: 更新 JSX 结构**
 
 ```tsx
-// src/App.tsx - 更新 return 部分
-
-// 更新背景色为温暖教学风（slate 系列）
+// src/App.tsx - 更新背景色为温暖教学风（slate 系列）
 // 更新圆角为 rounded-xl, rounded-lg
 // 强调色改为 indigo-500
 
-if (!currentScenario || !currentStep) {
-  return <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-    <p className="text-slate-100">加载中...</p>
-  </div>;
-}
-
-const progress = currentStepIndex / (currentScenario.steps.length - 1);
-
-return (
-  <div className="min-h-screen bg-slate-900 flex flex-col">
-    {/* Header */}
-    <header className="border-b border-slate-700 bg-slate-900/95 backdrop-blur sticky top-0 z-10">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-100">ReAct Context Explorer</h1>
-        <div className="w-64">
-          <ScenarioSelect
-            scenarios={scenarios}
-            currentId={scenarioId}
-            onChange={handleScenarioChange}
-          />
-        </div>
-      </div>
-    </header>
-
-    {/* Agent Status Bar */}
-    {animateMode && (
-      <AgentStatusBar
-        status={agentStatus}
-        message={agentMessage}
-        tokens={currentStep.tokens}
-      />
-    )}
-
-    {/* Main Content */}
-    <main className={`max-w-7xl mx-auto px-4 py-6 flex-1 ${animateMode ? 'pb-32' : ''}`}>
-      <div className="flex gap-6 h-[calc(100vh-120px)]">
-        {/* Left: Timeline */}
-        <aside className="w-72 flex-shrink-0">
-          <Timeline
-            steps={currentScenario.steps}
-            currentIndex={stepIndex}
-            onSelect={handleStepSelect}
-            playbackMode={animateMode}
-            isPlaybackActive={playback.mode === 'playing'}
-            onPlaybackStop={stopPlayback}
-          />
-        </aside>
-
-        {/* Right: Step Detail */}
-        <section className="flex-1 min-w-0">
-          <StepDetail
-            step={currentStep}
-            stepIndex={stepIndex}
-            totalSteps={currentScenario.steps.length}
-            onPrev={handlePrev}
-            onNext={handleNext}
-            isPlaying={animateMode}
-            animateMode={animateMode}
-          />
-        </section>
-      </div>
-    </main>
-
-    {/* Playback Bar - 仅在动画模式显示 */}
-    {animateMode && (
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur">
-        <PlaybackBar
-          mode={playback.mode}
-          speed={playback.speed}
-          progress={progress}
-          totalSteps={currentScenario.steps.length}
-          onTogglePlay={handleTogglePlay}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onSeek={handleSeek}
-          onSpeedChange={handleSpeedChange}
-        />
-      </div>
-    )}
-
-    {/* 播放按钮 - 浮动按钮 */}
-    {!animateMode && (
-      <button
-        onClick={() => setAnimateMode(true)}
-        className="fixed bottom-6 right-6 px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl shadow-lg transition-all flex items-center gap-2"
-      >
-        <span>▶️ 开始演示</span>
-      </button>
-    )}
-  </div>
-);
-```
-```
-
-- [ ] **Step 5: 清理定时器**
-
-```tsx
-// src/App.tsx - 添加 useEffect 清理
-
-useEffect(() => {
-  return () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-  };
-}, []);
+// 更新 Header 部分添加 AgentStatusBar
+// 更新 main 添加底部内边距
+// 更新 Timeline 添加播放模式相关 props
+// 更新 StepDetail 添加播放模式和 animateMode props
+// 添加 PlaybackBar 显示在底部
+// 添加"开始演示"按钮（非播放模式时显示）
 ```
 
 - [ ] **Step 6: Commit 整合**
-
-```bash
-git add src/App.tsx
-git commit -m "feat: 整合播放控制逻辑，支持动画演示"
-```
-
-```bash
-npm run dev
-```
-
-Expected:
-- 点击"开始演示"进入播放模式
-- Agent 状态栏显示思考/调用/观察状态
-- 消息逐条滑入并高亮
-- 进度条实时更新
-- 可以暂停、变速、跳转
-
-- [ ] **Step 7: 更新配色为温暖教学风**
-
-```tsx
-// 修改 src/App.tsx 中的颜色类名
-// gray-900 → slate-900
-// gray-800 → slate-800
-// gray-700 → slate-700
-// blue-500 → indigo-500
-// 紫色使用 violet-500
-// 天空色使用 sky-500
-// 绿色使用 emerald-500
-// 黄色使用 amber-500
-
-// 圆角统一为 rounded-xl, rounded-lg
-```
-
-- [ ] **Step 8: Commit 整合**
 
 ```bash
 git add src/App.tsx
@@ -1049,7 +743,5 @@ git commit -m "feat: 完成动画增强功能"
 
 - [ ] Chunk 4: 整合播放逻辑
   - [ ] Task 9: 整合播放控制到 App
-
-- [ ] Task 10: 端到端测试
 
 - [ ] Task 10: 端到端测试
