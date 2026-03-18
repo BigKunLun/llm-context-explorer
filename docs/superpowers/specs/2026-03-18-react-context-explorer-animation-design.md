@@ -161,7 +161,7 @@ const [animatingIndices, setAnimatingIndices] = useState<Set<number>>(new Set())
 
 ---
 
-## 三、组件设计
+## 四、组件设计
 
 ### 3.1 AgentStatusBar (新增)
 
@@ -334,7 +334,7 @@ const handleStepSelect = (index: number) => {
 
 ---
 
-## 四、视觉风格
+## 五、视觉风格
 
 ### 4.1 配色方案（温暖教学风）
 
@@ -371,7 +371,7 @@ const handleStepSelect = (index: number) => {
 
 ---
 
-## 五、播放控制功能
+## 六、播放控制功能
 
 ### 5.1 基础控制
 
@@ -456,7 +456,7 @@ function usePlayback(scenario: Scenario, onStepComplete: () => void) {
 
 ---
 
-## 六、数据流与动画时序
+## 七、数据流与动画时序
 
 ### 6.1 单步执行时序（基础速度 1x）
 
@@ -518,7 +518,7 @@ const handleStepSeek = (index: number) => {
 
 ---
 
-## 七、实现边界
+## 八、实现边界
 
 ### 7.1 不包含（后续迭代）
 
@@ -541,7 +541,7 @@ const handleStepSeek = (index: number) => {
 
 ---
 
-## 八、技术实现要点
+## 九、技术实现要点
 
 ### 8.1 动画库选择
 
@@ -577,7 +577,7 @@ useEffect(() => {
 
 ---
 
-## 九、文件变更清单
+## 十、文件变更清单
 
 | 文件 | 操作 | 说明 |
 |------|------|------|
