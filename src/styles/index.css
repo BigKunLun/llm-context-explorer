@@ -96,3 +96,74 @@ body {
 .step-type-badge {
   transition: all 0.2s ease;
 }
+
+/* ==================== StepDetail 动画 ==================== */
+
+/* 步骤详情淡入动画 */
+@keyframes stepDetailFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 步骤类型标签弹出动画 */
+@keyframes badgePop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 导航点指示器动画 */
+@keyframes dotPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+}
+
+/* 步骤详情容器 */
+.step-detail-container {
+  animation: stepDetailFadeIn 0.4s ease-out;
+}
+
+/* 步骤类型徽章 */
+.step-detail-badge {
+  animation: badgePop 0.3s ease-out;
+}
+
+/* 导航点指示器 */
+.nav-dot {
+  transition: all 0.3s ease;
+}
+
+.nav-dot.is-active {
+  animation: dotPulse 2s infinite;
+}
+
+/* 导航按钮悬停效果 */
+.nav-button {
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.nav-button:active:not(:disabled) {
+  transform: translateY(0);
+}

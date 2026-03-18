@@ -2,11 +2,41 @@
 import type { Step, StepType } from '../types';
 import { ContextViewer } from './ContextViewer';
 
-const stepTypeStyles: Record<StepType, { bg: string; text: string; icon: string; label: string }> = {
-  THOUGHT: { bg: 'bg-purple-500/20', text: 'text-purple-400', icon: '🧠', label: '思考' },
-  ACTION: { bg: 'bg-blue-500/20', text: 'text-blue-400', icon: '⚡', label: '行动' },
-  OBSERVATION: { bg: 'bg-green-500/20', text: 'text-green-400', icon: '👁️', label: '观察' },
-  ANSWER: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: '💬', label: '回答' },
+const stepTypeStyles: Record<StepType, {
+  bg: string;
+  text: string;
+  icon: string;
+  label: string;
+  activeBg: string;
+}> = {
+  THOUGHT: {
+    bg: 'bg-purple-500/20',
+    text: 'text-purple-400',
+    icon: '🧠',
+    label: '思考',
+    activeBg: 'bg-purple-500/30',
+  },
+  ACTION: {
+    bg: 'bg-blue-500/20',
+    text: 'text-blue-400',
+    icon: '⚡',
+    label: '行动',
+    activeBg: 'bg-blue-500/30',
+  },
+  OBSERVATION: {
+    bg: 'bg-green-500/20',
+    text: 'text-green-400',
+    icon: '👁️',
+    label: '观察',
+    activeBg: 'bg-green-500/30',
+  },
+  ANSWER: {
+    bg: 'bg-amber-500/20',
+    text: 'text-amber-400',
+    icon: '💬',
+    label: '回答',
+    activeBg: 'bg-amber-500/30',
+  },
 };
 
 interface StepDetailProps {
@@ -15,20 +45,40 @@ interface StepDetailProps {
   totalSteps: number;
   onPrev: () => void;
   onNext: () => void;
+  /** 是否启用动画 */
+  animate?: boolean;
+  /** 导航按钮禁用状态 */
+  disabledPrev?: boolean;
+  disabledNext?: boolean;
 }
 
-export function StepDetail({ step, stepIndex, totalSteps, onPrev, onNext }: StepDetailProps) {
+export function StepDetail({
+  step,
+  stepIndex,
+  totalSteps,
+  onPrev,
+  onNext,
+  animate = true,
+  disabledPrev = false,
+  disabledNext = false,
+}: StepDetailProps) {
   const style = stepTypeStyles[step.type];
-  const isFirst = stepIndex === 0;
-  const isLast = stepIndex === totalSteps - 1;
+  const isFirst = stepIndex === 0 || disabledPrev;
+  const isLast = stepIndex === totalSteps - 1 || disabledNext;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className={`
+      h-full flex flex-col
+      ${animate ? 'step-detail-container' : ''}
+    `}>
       {/* 步骤头部信息 */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <span className={`px-3 py-1 rounded-lg text-sm font-medium ${style.bg} ${style.text}`}>
+            <span className={`
+              step-detail-badge px-3 py-1 rounded-lg text-sm font-medium
+              ${style.activeBg} ${style.text}
+            `}>
               {style.icon} {style.label}
             </span>
             <span className="text-gray-500 text-sm">
@@ -52,16 +102,18 @@ export function StepDetail({ step, stepIndex, totalSteps, onPrev, onNext }: Step
         <ContextViewer
           messages={step.contextSnapshot}
           tokens={step.tokens}
+          animate={animate}
         />
       </div>
 
       {/* 导航按钮 */}
       <div className="flex items-center justify-between pt-4 border-t border-gray-700">
         <button
+          type="button"
           onClick={onPrev}
           disabled={isFirst}
           className={`
-            px-4 py-2 rounded-lg font-medium text-sm transition-all
+            nav-button px-4 py-2 rounded-lg font-medium text-sm
             ${isFirst
               ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
               : 'bg-gray-700 text-white hover:bg-gray-600'
@@ -74,20 +126,25 @@ export function StepDetail({ step, stepIndex, totalSteps, onPrev, onNext }: Step
           {Array.from({ length: totalSteps }, (_, i) => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full ${
-                i === stepIndex ? 'bg-blue-500' : 'bg-gray-600'
-              }`}
+              className={`
+                nav-dot w-2 h-2 rounded-full
+                ${i === stepIndex
+                  ? 'bg-blue-500 is-active'
+                  : 'bg-gray-600'
+                }
+              `}
             />
           ))}
         </div>
         <button
+          type="button"
           onClick={onNext}
           disabled={isLast}
           className={`
-            px-4 py-2 rounded-lg font-medium text-sm transition-all
+            nav-button px-4 py-2 rounded-lg font-medium text-sm
             ${isLast
               ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-500'
+              : 'bg-gray-700 text-white hover:bg-gray-600'
             }
           `}
         >
