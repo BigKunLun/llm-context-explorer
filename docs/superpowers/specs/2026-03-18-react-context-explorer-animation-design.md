@@ -47,21 +47,47 @@ App (播放控制器)
         └── ContextMessage[] (单条消息独立动画)
 ```
 
-### 2.2 状态管理
+### 2.2 类型定义（新增到 src/types/index.ts）
 
 ```typescript
-interface PlaybackState {
-  mode: 'playing' | 'paused' | 'stopped';
-  speed: 0.5 | 1 | 1.5 | 2;
+// === 播放控制相关 ===
+export type PlaybackMode = 'playing' | 'paused' | 'stopped';
+export type PlaybackSpeed = 0.5 | 1 | 1.5 | 2;
+
+export interface PlaybackState {
+  mode: PlaybackMode;
+  speed: PlaybackSpeed;
   currentStepIndex: number;
   isAnimating: boolean;
 }
 
-interface AgentState {
-  status: 'idle' | 'thinking' | 'acting' | 'observing' | 'answering';
+export const SPEED_MAP: Record<PlaybackSpeed, number> = {
+  0.5: 3000,
+  1: 1500,
+  1.5: 1000,
+  2: 750,
+};
+
+// === Agent 状态相关 ===
+export type AgentStatus = 'idle' | 'thinking' | 'acting' | 'observing' | 'answering';
+
+export interface AgentState {
+  status: AgentStatus;
   message: string;
 }
 
+export const AGENT_STATUS_CONFIG: Record<AgentStatus, { icon: string; text: string; color: string }> = {
+  idle: { icon: '', text: '就绪', color: 'slate-500' },
+  thinking: { icon: '🧠', text: '思考中...', color: 'violet-500' },
+  acting: { icon: '⚡', text: '调用工具中...', color: 'sky-500' },
+  observing: { icon: '👁️', text: '观察结果中...', color: 'emerald-500' },
+  answering: { icon: '💬', text: '生成回答中...', color: 'amber-500' },
+};
+```
+
+### 2.3 App 状态管理
+
+```typescript
 // App 持有
 const [playback, setPlayback] = useState<PlaybackState>({
   mode: 'stopped',
@@ -115,16 +141,16 @@ const [agentState, setAgentState] = useState<AgentState>({
 
 **Props**:
 ```typescript
+import type { AgentStatus } from '../types';
+
 interface AgentStatusBarProps {
   status: AgentStatus;
   message: string;
   tokens: { used: number; limit: number };
 }
-
-type AgentStatus = 'idle' | 'thinking' | 'acting' | 'observing' | 'answering';
 ```
 
-**状态映射**:
+**状态映射**（使用 AGENT_STATUS_CONFIG）:
 | status | 图标 | 文本 | 颜色 |
 |--------|------|------|------|
 | idle | - | 就绪 | slate-500 |
@@ -146,6 +172,8 @@ type AgentStatus = 'idle' | 'thinking' | 'acting' | 'observing' | 'answering';
 
 **Props**:
 ```typescript
+import type { PlaybackMode, PlaybackSpeed } from '../types';
+
 interface PlaybackBarProps {
   mode: PlaybackMode;
   speed: PlaybackSpeed;
@@ -156,9 +184,6 @@ interface PlaybackBarProps {
   onSeek: (progress: number) => void;
   onSpeedChange: (speed: PlaybackSpeed) => void;
 }
-
-type PlaybackMode = 'playing' | 'paused' | 'stopped';
-type PlaybackSpeed = 0.5 | 1 | 1.5 | 2;
 ```
 
 ### 3.3 ContextViewer (动画增强)
@@ -202,19 +227,52 @@ type PlaybackSpeed = 0.5 | 1 | 1.5 | 2;
 interface ContextViewerProps {
   messages: ContextMessage[];
   tokens: { used: number; limit: number };
-  animateMode?: boolean; // 新增：控制是否启用动画
-  newMessageIndex?: number; // 新增：指定哪条消息是新的
+  animateMode?: boolean; // 控制是否启用动画
+  animatingIndices?: Set<number>; // 正在播放动画的消息索引
+  onAnimationComplete?: (index: number) => void; // 动画完成回调
 }
+
+// 动画生命周期
+// 1. 父组件设置 animatingIndices = Set(index)
+// 2. ContextMessage 获得动画类名，开始播放
+// 3. 动画完成后触发 onAnimationComplete(index)
+// 4. 父组件从 animatingIndices 中移除该索引
 ```
 
 ### 3.4 StepCard (播放模式增强)
+
+**Props**:
+```typescript
+interface StepCardProps {
+  step: Step;
+  index: number;
+  isActive: boolean;
+  isPlaying?: boolean; // 是否处于播放模式
+  onClick: () => void;
+}
+```
 
 **播放模式时**:
 - 当前步骤自动高亮（无需点击）
 - 非当前步骤淡化显示
 - 有"播放中"微动画（光标闪烁或边缘发光）
 
-### 3.5 Timeline (播放模式增强)
+### 3.5 StepDetail (Props 扩展)
+
+**Props**:
+```typescript
+interface StepDetailProps {
+  step: Step;
+  stepIndex: number;
+  totalSteps: number;
+  onPrev: () => void;
+  onNext: () => void;
+  isPlaying?: boolean; // 播放模式下禁用手动导航
+  animateMode?: boolean; // 是否启用动画
+}
+```
+
+### 3.6 Timeline (播放模式增强)
 
 **Props**:
 ```typescript
@@ -222,8 +280,20 @@ interface TimelineProps {
   steps: Step[];
   currentIndex: number;
   onSelect: (index: number) => void;
-  playbackMode?: boolean; // 新增：是否处于播放模式
+  playbackMode?: boolean; // 是否处于播放模式
+  isPlaybackActive?: boolean; // 播放是否正在进行（用于处理点击冲突）
 }
+```
+
+**播放/手动切换冲突处理**:
+```typescript
+const handleStepSelect = (index: number) => {
+  // 如果正在播放，先停止播放
+  if (isPlaybackActive) {
+    onPlaybackStop?.(); // 通知父组件停止播放
+  }
+  onSelect(index);
+};
 ```
 
 ---
@@ -288,19 +358,50 @@ interface TimelineProps {
 ### 5.3 自动播放逻辑
 
 ```typescript
-function usePlayback(scenario: Scenario) {
+function usePlayback(scenario: Scenario, onStepComplete: () => void) {
   const timerRef = useRef<number>();
+  const { currentStepIndex, mode, speed } = playback;
+
+  // 组件卸载时清理定时器
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   const startPlayback = (speed: PlaybackSpeed) => {
-    const interval = SPEED_MAP[speed]; // 1500ms for 1x
+    const interval = SPEED_MAP[speed];
     timerRef.current = setInterval(() => {
-      // 执行下一步动画
       executeNextStepAnimation();
     }, interval);
   };
 
   const stopPlayback = () => {
-    clearInterval(timerRef.current);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = undefined;
+    }
+  };
+
+  // 执行下一步动画
+  const executeNextStepAnimation = () => {
+    const step = scenario.steps[currentStepIndex];
+
+    // 1. 触发消息动画进场
+    triggerMessageAnimations(step.contextDiff);
+
+    // 2. 动画完成后触发回调
+    setTimeout(() => {
+      onStepComplete();
+    }, getAnimationDelay(speed));
+  };
+
+  // 根据速度计算动画延迟
+  const getAnimationDelay = (speed: PlaybackSpeed): number => {
+    const baseDelay = 800; // 基础动画时长
+    return baseDelay / speed;
   };
 
   return { startPlayback, stopPlayback };
@@ -311,33 +412,37 @@ function usePlayback(scenario: Scenario) {
 
 ## 六、数据流与动画时序
 
-### 6.1 单步执行时序
+### 6.1 单步执行时序（基础速度 1x）
 
 ```
-时刻 0ms:
+时刻 0ms (speed * 1):
   ├─ AgentState: thinking → "分析用户请求..."
   ├─ Timeline: 高亮当前步骤
   └─ StepDetail: 显示标题
 
-时刻 300ms:
+时刻 300ms (speed * 1):
   ├─ ContextViewer: 新消息滑入动画开始
   └─ ContextViewer: 新消息高亮闪烁
 
-时刻 800ms:
+时刻 800ms (speed * 1):
   ├─ 动画完成
   ├─ AgentState: acting → "调用天气工具"
   └─ ContextViewer: 下一新消息滑入
 
-时刻 1300ms:
+时刻 1300ms (speed * 1):
   ├─ 动画完成
   ├─ AgentState: observing → "获取天气结果"
   └─ ContextViewer: 工具结果滑入
 
-时刻 1800ms:
+时刻 1800ms (speed * 1):
   └─ 准备下一步
+
+// 速度为 0.5x 时，所有时刻乘以 2
+// 速度为 1.5x 时，所有时刻除以 1.5
+// 速度为 2x 时，所有时刻除以 2
 ```
 
-### 6.2 播放/暂停处理
+### 6.2 播放/暂停/跳转处理
 
 **暂停时**:
 - 停止定时器
@@ -348,10 +453,22 @@ function usePlayback(scenario: Scenario) {
 - 从当前步骤继续
 - 速度设置保持不变
 
-**跳转时**:
-- 停止当前动画
-- 直接跳到目标步骤的最终状态
-- 重置播放状态为 paused
+**手动跳转时**:
+```typescript
+const handleStepSeek = (index: number) => {
+  // 如果正在播放，先停止
+  if (playback.mode === 'playing') {
+    stopPlayback();
+    setPlayback(prev => ({ ...prev, mode: 'paused' }));
+  }
+
+  // 直接跳到目标步骤（不播放动画）
+  setStepIndex(index);
+
+  // 停止所有正在进行的动画
+  setAnimatingIndices(new Set());
+};
+```
 
 ---
 
@@ -418,11 +535,12 @@ useEffect(() => {
 
 | 文件 | 操作 | 说明 |
 |------|------|------|
-| `src/App.tsx` | 修改 | 增加 PlaybackState, AgentState |
+| `src/App.tsx` | 修改 | 增加 PlaybackState, AgentState，整合播放控制逻辑 |
 | `src/components/AgentStatusBar.tsx` | 新增 | 顶部状态栏组件 |
 | `src/components/PlaybackBar.tsx` | 新增 | 底部播放控制组件 |
-| `src/components/ContextViewer.tsx` | 修改 | 增加动画效果 |
-| `src/components/StepCard.tsx` | 修改 | 播放模式增强 |
-| `src/components/Timeline.tsx` | 修改 | 播放模式增强 |
-| `src/types/index.ts` | 修改 | 新增相关类型 |
-| `src/styles/index.css` | 修改 | 动画关键帧 |
+| `src/components/ContextViewer.tsx` | 修改 | 增加消息滑入动画、动画状态管理 |
+| `src/components/StepCard.tsx` | 修改 | 增加 isPlaying, isPlaybackActive 支持 |
+| `src/components/Timeline.tsx` | 修改 | 增加 playbackMode, isPlaybackActive 支持，处理播放/点击冲突 |
+| `src/components/StepDetail.tsx` | 修改 | 增加 isPlaying, animateMode Props |
+| `src/types/index.ts` | 修改 | 新增 PlaybackMode, PlaybackSpeed, AgentStatus, SPEED_MAP, AGENT_STATUS_CONFIG |
+| `src/styles/index.css` | 修改 | 添加 slideIn, highlight 动画关键帧 |
