@@ -78,40 +78,10 @@ export const AGENT_STATUS_CONFIG: Record<AgentStatus, { icon: string; text: stri
 };
 ```
 
-- [ ] **Step 3: 添加场景和消息类型补充**
-
-```typescript
-// === 场景相关（补充现有定义）===
-export interface Step {
-  // ... 现有字段 ...
-  /** 该步骤新增的上下文内容（用于动画） */
-  contextDiff: ContextMessage[];
-  /** token 统计 */
-  tokens: {
-    used: number;
-    limit: number;
-  };
-}
-
-export interface ContextMessage {
-  // ... 现有字段 ...
-  /** 是否为当前步骤新增（用于高亮） */
-  isNew?: boolean;
-}
-```
-
-- [ ] **Step 4: 更新 scenarios.ts 导入**
-
-```typescript
-// src/data/scenarios.ts
-import type { Scenario, Step, ContextMessage } from '../types';
-// 确保类型正确导入和使用
-```
-
-- [ ] **Step 5: Commit 类型定义**
+- [ ] **Step 3: Commit 类型定义**
 
 ```bash
-git add src/types/index.ts src/data/scenarios.ts
+git add src/types/index.ts
 git commit -m "feat: 添加播放控制和 Agent 状态类型定义"
 ```
 
@@ -252,7 +222,6 @@ git commit -m "feat: 添加 AgentStatusBar 组件"
 ```tsx
 // src/components/PlaybackBar.tsx
 import type { PlaybackMode, PlaybackSpeed } from '../types';
-import { SPEED_MAP } from '../types';
 
 interface PlaybackBarProps {
   mode: PlaybackMode;
@@ -369,40 +338,37 @@ git commit -m "feat: 添加 PlaybackBar 组件"
 
 ```tsx
 // src/components/ContextViewer.tsx
-// 添加到现有 interface
-interface ContextViewerProps {
-  messages: ContextMessage[];
-  tokens: { used: number; limit: number };
-  animateMode?: boolean; // 控制是否启用动画
-  animatingIndices?: Set<number>; // 正在播放动画的消息索引
-  onAnimationComplete?: (index: number) => void; // 动画完成回调
-}
+// 添加到现有 interface ContextViewerProps
+animateMode?: boolean; // 控制是否启用动画
+animatingIndices?: Set<number>; // 正在播放动画的消息索引
+onAnimationComplete?: (index: number) => void; // 动画完成回调
 ```
 
-- [ ] **Step 2: 添加动画结束处理 hook**
+- [ ] **Step 2: 更新消息渲染添加动画类名**
 
 ```tsx
-// 组件内添加
-const handleAnimationEnd = (index: number) => {
-  onAnimationComplete?.(index);
-};
-
-// 消息添加动画事件监听
+// src/components/ContextViewer.tsx - 在消息 div 上添加条件类名
 <div
+  key={index}
+  className={`p-3 ${getAnimationClassName(index)}`}
   onAnimationEnd={() => handleAnimationEnd(index)}
-  className={getAnimationClassName(index)}
 >
 ```
 
-- [ ] **Step 3: 添加动画类名计算**
+- [ ] **Step 3: 添加动画类名计算函数**
 
 ```tsx
+// src/components/ContextViewer.tsx - 添加组件内函数
 const getAnimationClassName = (index: number): string => {
   if (!animateMode) return '';
   if (animatingIndices?.has(index)) {
-    return 'new';
+    return 'new context-message-new';
   }
   return '';
+};
+
+const handleAnimationEnd = (index: number) => {
+  onAnimationComplete?.(index);
 };
 ```
 
@@ -414,98 +380,7 @@ npm run dev
 
 Expected: 新消息从右侧滑入，有高亮闪烁
 
-- [ ] **Step 5: ContextViewer 修改**
-
-```tsx
-// src/components/ContextViewer.tsx
-import type { ContextMessage } from '../types';
-
-const roleLabels: Record<ContextMessage['role'], { label: string; color: string }> = {
-  system: { label: 'System', color: 'bg-slate-600 text-slate-200' },
-  user: { label: 'User', color: 'bg-indigo-600 text-indigo-100' },
-  assistant: { label: 'Assistant', color: 'bg-emerald-600 text-emerald-100' },
-  tool_call: { label: 'Tool Call', color: 'bg-violet-600 text-violet-100' },
-  tool_result: { label: 'Tool Result', color: 'bg-sky-600 text-sky-100' },
-};
-
-interface ContextViewerProps {
-  messages: ContextMessage[];
-  tokens: { used: number; limit: number };
-  animateMode?: boolean;
-  animatingIndices?: Set<number>;
-  onAnimationComplete?: (index: number) => void;
-}
-
-export function ContextViewer({ messages, tokens, animateMode, animatingIndices, onAnimationComplete }: ContextViewerProps) {
-  const tokenPercentage = (tokens.used / tokens.limit) * 100;
-
-  const handleAnimationEnd = (index: number) => {
-    onAnimationComplete?.(index);
-  };
-
-  const getAnimationClassName = (index: number): string => {
-    if (!animateMode) return '';
-    if (animatingIndices?.has(index)) {
-      return 'new';
-    }
-    return '';
-  };
-
-  return (
-    <div>
-      {/* Token 统计 */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-          当前上下文
-        </h3>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-400">
-            Tokens: <span className="text-slate-100 font-mono">{tokens.used}</span> / {tokens.limit}
-          </span>
-          <div className="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all ${
-                tokenPercentage > 80 ? 'bg-red-500' : tokenPercentage > 50 ? 'bg-yellow-500' : 'bg-emerald-500'
-              }`}
-              style={{ width: `${Math.min(tokenPercentage, 100)}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 消息列表 */}
-      <div className="bg-slate-800/80 rounded-xl border border-slate-700 divide-y divide-slate-700/50">
-        {messages.map((msg, index) => {
-          const roleStyle = roleLabels[msg.role];
-          return (
-            <div
-              key={index}
-              onAnimationEnd={() => handleAnimationEnd(index)}
-              className={`p-3 ${getAnimationClassName(index)}`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <span className={`px-2 py-0.5 rounded text-xs font-medium ${roleStyle.color}`}>
-                  {roleStyle.label}
-                </span>
-                {msg.isNew && (
-                  <span className="px-1.5 py-0.5 rounded text-xs bg-indigo-500 text-white">
-                    NEW
-                  </span>
-                )}
-              </div>
-              <pre className="text-sm text-slate-300 whitespace-pre-wrap font-mono break-all">
-                {msg.content}
-              </pre>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-```
-
-- [ ] **Step 6: Commit 修改**
+- [ ] **Step 5: Commit 修改**
 
 ```bash
 git add src/components/ContextViewer.tsx
@@ -771,8 +646,8 @@ import { Timeline } from './components/Timeline';
 import { StepDetail } from './components/StepDetail';
 import { AgentStatusBar } from './components/AgentStatusBar';
 import { PlaybackBar } from './components/PlaybackBar';
-import type { PlaybackState, PlaybackSpeed, PlaybackMode } from './types';
-import { SPEED_MAP, type AgentStatus, AGENT_STATUS_CONFIG } from './types';
+import type { PlaybackState, PlaybackSpeed, PlaybackMode, AgentStatus } from './types';
+import { SPEED_MAP, AGENT_STATUS_CONFIG } from './types';
 
 function App() {
   const [scenarioId, setScenarioId] = useState(scenarios[0].id);
@@ -794,7 +669,7 @@ function App() {
   // 动画中消息索引
   const [animatingIndices, setAnimatingIndices] = useState<Set<number>>(new Set());
 
-  const timerRef = useRef<number>();
+  const timerRef = useRef<NodeJS.Timeout>();
 ```
 
 - [ ] **Step 2: 添加播放控制函数**
@@ -806,12 +681,12 @@ const currentScenario = useMemo(() => getScenarioById(scenarioId), [scenarioId])
 const currentStep = currentScenario?.steps[stepIndex];
 
 // 处理场景切换
-const handleScenarioChange = (id: string) => {
+const handleScenarioChange = useCallback((id: string) => {
   setScenarioId(id);
   setStepIndex(0);
   stopPlayback();
   setAnimateMode(false);
-};
+}, []);
 
 // 手动步骤选择
 const handleStepSelect = useCallback((index: number) => {
@@ -868,9 +743,11 @@ const startPlayback = useCallback(() => {
   setAgentStatus('thinking');
   setAgentMessage('分析用户请求...');
 
-  // 立即触发第一步动画
-  executeStepAnimation(0);
-}, [currentScenario]);
+  // 使用 setTimeout 而非立即执行，确保状态更新
+  setTimeout(() => {
+    triggerStepAnimation(stepIndex);
+  }, 0);
+}, [currentScenario, stepIndex]);
 
 const stopPlayback = useCallback(() => {
   if (timerRef.current) {
@@ -880,9 +757,11 @@ const stopPlayback = useCallback(() => {
   setPlayback(prev => ({ ...prev, mode: 'paused', isAnimating: false }));
   setAgentStatus('idle');
   setAgentMessage('');
+  setAnimatingIndices(new Set());
 }, []);
 
-const executeStepAnimation = useCallback((stepIndexToExecute: number) => {
+// 触发单步动画（包括 Agent 状态更新和消息动画）
+const triggerStepAnimation = useCallback((stepIndexToExecute: number) => {
   if (!currentScenario || !playback.isAnimating) return;
 
   const step = currentScenario.steps[stepIndexToExecute];
@@ -909,30 +788,56 @@ const executeStepAnimation = useCallback((stepIndexToExecute: number) => {
   });
   setAnimatingIndices(new Set(newIndices));
 
-  // 设置完成后清理并准备下一步
+  // 设置完成后准备下一步
   const animationDuration = SPEED_MAP[playback.speed] * 0.5;
-  timerRef.current = window.setTimeout(() => {
+  timerRef.current = setTimeout(() => {
     setAnimatingIndices(new Set());
-    setStepIndex(prev => {
-      const nextIndex = prev + 1;
-      if (nextIndex < currentScenario.steps.length) {
-        // 继续下一步
-        executeStepAnimation(nextIndex);
-      } else {
-        // 播放完成
-        stopPlayback();
-        setAgentStatus('idle');
-      }
-      return prev;
-    });
+    // 使用回调而非直接递归，避免状态更新问题
+    const nextIndex = stepIndexToExecute + 1;
+    if (nextIndex < currentScenario.steps.length) {
+      triggerStepAnimation(nextIndex);
+    } else {
+      stopPlayback();
+    }
   }, animationDuration);
-}, [currentScenario, playback.speed, playback.isAnimating]);
+}, [currentScenario, playback.speed, playback.isAnimating, stepIndex]);
+```
+
+- [ ] **Step 4: 添加 useEffect 监听 stepIndex 变化**
+
+```tsx
+// src/App.tsx - 添加组件顶部（在其他 hooks 之后）
+
+// 监听 stepIndex 变化，触发对应步骤动画（播放时）
+useEffect(() => {
+  if (animateMode && playback.mode === 'playing' && currentScenario) {
+    triggerStepAnimation(stepIndex);
+  }
+}, [stepIndex, animateMode, playback.mode]);
+```
+
+- [ ] **Step 5: 清理定时器**
+
+```tsx
+// src/App.tsx - 添加组件顶部 cleanup
+
+useEffect(() => {
+  return () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+  };
+}, []);
 ```
 
 - [ ] **Step 4: 更新 JSX 结构**
 
 ```tsx
 // src/App.tsx - 更新 return 部分
+
+// 更新背景色为温暖教学风（slate 系列）
+// 更新圆角为 rounded-xl, rounded-lg
+// 强调色改为 indigo-500
 
 if (!currentScenario || !currentStep) {
   return <div className="min-h-screen bg-slate-900 flex items-center justify-center">
@@ -1026,6 +931,7 @@ return (
   </div>
 );
 ```
+```
 
 - [ ] **Step 5: 清理定时器**
 
@@ -1041,7 +947,12 @@ useEffect(() => {
 }, []);
 ```
 
-- [ ] **Step 6: 测试播放流程**
+- [ ] **Step 6: Commit 整合**
+
+```bash
+git add src/App.tsx
+git commit -m "feat: 整合播放控制逻辑，支持动画演示"
+```
 
 ```bash
 npm run dev
@@ -1138,5 +1049,7 @@ git commit -m "feat: 完成动画增强功能"
 
 - [ ] Chunk 4: 整合播放逻辑
   - [ ] Task 9: 整合播放控制到 App
+
+- [ ] Task 10: 端到端测试
 
 - [ ] Task 10: 端到端测试
