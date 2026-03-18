@@ -3,3 +3,57 @@
 body {
   @apply bg-gray-900 text-gray-100;
 }
+
+/* ==================== 上下文消息动画 ==================== */
+
+/* 消息淡入动画 */
+@keyframes messageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 新消息高亮脉冲动画 */
+@keyframes highlightPulse {
+  0% {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  100% {
+    background-color: rgba(59, 130, 246, 0.05);
+  }
+}
+
+/* 消息容器 */
+.context-message {
+  animation: messageFadeIn 0.3s ease-out;
+  transition: all 0.3s ease;
+}
+
+.context-message.is-new {
+  animation:
+    messageFadeIn 0.4s ease-out,
+    highlightPulse 2s ease-out;
+}
+
+/* 消息内容 */
+.context-message-content {
+  animation: messageFadeIn 0.4s ease-out 0.1s both;
+}
+
+/* Token 进度条动画 */
+.token-progress-bar {
+  transition: width 0.5s ease-out, background-color 0.3s ease;
+}
+
+/* 平滑滚动 */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
