@@ -81,13 +81,6 @@ function App() {
     };
   }, [isPlaying, stepIndex, speed, currentScenario]);
 
-  // 组件卸载时清理
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
-
   const handleScenarioChange = useCallback((id: string) => {
     stopPlayback();
     setScenarioId(id);
@@ -99,14 +92,12 @@ function App() {
   }, []);
 
   const handleTogglePlay = useCallback(() => {
-    setIsPlaying(prev => {
-      // 如果当前在最后一步且要开始播放，重置到第一步
-      if (!prev && stepIndex >= totalSteps - 1 && totalSteps > 0) {
-        setStepIndex(0);
-      }
-      return !prev;
-    });
-  }, [stepIndex, totalSteps]);
+    // 如果当前在最后一步且要开始播放，重置到第一步
+    if (!isPlaying && stepIndex >= totalSteps - 1 && totalSteps > 0) {
+      setStepIndex(0);
+    }
+    setIsPlaying(prev => !prev);
+  }, [isPlaying, stepIndex, totalSteps]);
 
   const handlePrev = useCallback(() => {
     stopPlayback();
@@ -163,8 +154,8 @@ function App() {
         </div>
       </header>
 
-      {/* Agent Status Bar - 播放中或已完成时显示 */}
-      {(isPlaying || agentState.status === 'completed') && (
+      {/* Agent Status Bar - 仅播放中显示 */}
+      {isPlaying && (
         <AgentStatusBar
           state={agentState}
           currentStepTitle={currentStep.title}
@@ -195,8 +186,7 @@ function App() {
               totalSteps={totalSteps}
               onPrev={handlePrev}
               onNext={handleNext}
-              disabledPrev={isPlaying}
-              disabledNext={isPlaying}
+              hideNav={isPlaying}
             />
           </section>
         </div>

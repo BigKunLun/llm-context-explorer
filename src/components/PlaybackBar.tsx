@@ -140,7 +140,7 @@ export function PlaybackBar({
           <span className="text-xs text-gray-400">速度:</span>
           <select
             value={speed}
-            onChange={(e) => onSpeedChange(e.target.value as unknown as PlaybackSpeed)}
+            onChange={(e) => onSpeedChange(Number(e.target.value) as PlaybackSpeed)}
             className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 cursor-pointer hover:border-gray-500"
             aria-label="播放速度"
           >

@@ -8,6 +8,8 @@ interface ScenarioSelectProps {
 }
 
 export function ScenarioSelect({ scenarios, currentId, onChange }: ScenarioSelectProps) {
+  const current = scenarios.find(s => s.id === currentId);
+
   return (
     <div className="mb-6">
       <label className="block text-sm font-medium text-gray-400 mb-2">
@@ -24,9 +26,9 @@ export function ScenarioSelect({ scenarios, currentId, onChange }: ScenarioSelec
           </option>
         ))}
       </select>
-      {scenarios.find(s => s.id === currentId)?.description && (
+      {current?.description && (
         <p className="mt-2 text-sm text-gray-500">
-          {scenarios.find(s => s.id === currentId)?.description}
+          {current.description}
         </p>
       )}
     </div>

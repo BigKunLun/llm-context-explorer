@@ -196,3 +196,9 @@ body {
 .nav-button:active:not(:disabled) {
   transform: translateY(0);
 }
+
+/* 禁用动画 */
+.animation-none {
+  animation: none !important;
+  transition: none !important;
+}

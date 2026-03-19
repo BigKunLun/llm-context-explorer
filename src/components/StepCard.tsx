@@ -1,32 +1,6 @@
 // src/components/StepCard.tsx
-import type { Step, StepType } from '../types';
-
-const stepTypeStyles: Record<StepType, { bg: string; text: string; icon: string; activeBg: string }> = {
-  THOUGHT: {
-    bg: 'bg-purple-500/20',
-    text: 'text-purple-400',
-    icon: '🧠',
-    activeBg: 'bg-purple-500/30',
-  },
-  ACTION: {
-    bg: 'bg-blue-500/20',
-    text: 'text-blue-400',
-    icon: '⚡',
-    activeBg: 'bg-blue-500/30',
-  },
-  OBSERVATION: {
-    bg: 'bg-green-500/20',
-    text: 'text-green-400',
-    icon: '👁️',
-    activeBg: 'bg-green-500/30',
-  },
-  ANSWER: {
-    bg: 'bg-amber-500/20',
-    text: 'text-amber-400',
-    icon: '💬',
-    activeBg: 'bg-amber-500/30',
-  },
-};
+import type { Step } from '../types';
+import { STEP_TYPE_STYLES } from '../constants/stepStyles';
 
 interface StepCardProps {
   step: Step;
@@ -47,7 +21,7 @@ export function StepCard({
   animate = true,
   isCompleted = false,
 }: StepCardProps) {
-  const style = stepTypeStyles[step.type];
+  const style = STEP_TYPE_STYLES[step.type];
 
   return (
     <button
