@@ -11,21 +11,6 @@ interface AgentStatusBarProps {
   compact?: boolean;
 }
 
-/**
- * 状态指示器动画组件
- */
-function StatusIndicator({ isAnimating, color }: { isAnimating: boolean; color: string }) {
-  return (
-    <span
-      className={`
-        w-3 h-3 rounded-full
-        ${isAnimating ? 'animate-pulse' : ''}
-      `}
-      style={{ backgroundColor: isAnimating ? undefined : 'currentColor' }}
-    />
-  );
-}
-
 export function AgentStatusBar({
   state,
   currentStepTitle,

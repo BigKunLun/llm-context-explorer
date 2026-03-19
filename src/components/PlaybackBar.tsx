@@ -1,5 +1,5 @@
 // src/components/PlaybackBar.tsx
-import type { PlaybackMode, PlaybackSpeed, PlaybackState } from '../types';
+import type { PlaybackSpeed, PlaybackState } from '../types';
 
 interface PlaybackBarProps {
   /** 当前播放状态 */

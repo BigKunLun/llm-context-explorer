@@ -3,11 +3,6 @@ import type {
   Scenario,
   Step,
   ContextMessage,
-  PlaybackMode,
-  PlaybackSpeed,
-  PlaybackState,
-  AgentStatus,
-  AgentState,
 } from '../types';
 
 /** 系统消息模板 */
