@@ -12,6 +12,8 @@ const roleLabels: Record<MessageRole, { label: string; color: string }> = {
 
 interface ContextViewerProps {
   messages: ContextMessage[];
+  /** 新增的消息列表（用于高亮显示） */
+  newMessages?: ContextMessage[];
   tokens: { used: number; limit: number };
   /** 是否自动滚动到底部 */
   autoScroll?: boolean;
@@ -21,12 +23,20 @@ interface ContextViewerProps {
 
 export function ContextViewer({
   messages,
+  newMessages = [],
   tokens,
   autoScroll = true,
   animate = true,
 }: ContextViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const tokenPercentage = (tokens.used / tokens.limit) * 100;
+
+  // 检查消息是否为新消息
+  const isNewMessage = (msg: ContextMessage) => {
+    return newMessages.some(
+      (newMsg) => newMsg.role === msg.role && newMsg.content === msg.content
+    );
+  };
 
   // 自动滚动到底部
   useEffect(() => {
@@ -76,12 +86,13 @@ export function ContextViewer({
       >
         {messages.map((msg, index) => {
           const roleStyle = roleLabels[msg.role];
+          const isNew = isNewMessage(msg, index);
           return (
             <div
               key={index}
               className={`
                 context-message p-3
-                ${msg.isNew
+                ${isNew
                   ? 'is-new bg-blue-500/10 border-l-2 border-blue-500'
                   : 'border-l-2 border-transparent'
                 }
@@ -92,7 +103,7 @@ export function ContextViewer({
                 <span className={`px-2 py-0.5 rounded text-xs font-medium ${roleStyle.color}`}>
                   {roleStyle.label}
                 </span>
-                {msg.isNew && (
+                {isNew && (
                   <span className={`
                     px-1.5 py-0.5 rounded text-xs bg-blue-500 text-white
                     ${animate ? 'context-message-content' : ''}

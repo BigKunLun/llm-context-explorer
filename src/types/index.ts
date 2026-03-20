@@ -66,7 +66,6 @@ export type AgentStatus =
   | 'acting'       // 执行动作中
   | 'observing'    // 观察结果中
   | 'answering'    // 生成回答中
-  | 'paused'       // 已暂停
   | 'completed';   // 已完成
 
 /** Agent 完整状态 */
@@ -103,11 +102,6 @@ export const AGENT_STATUS_CONFIG = {
     label: '回答中',
     icon: '◉',
     color: 'text-green-400',
-  },
-  paused: {
-    label: '已暂停',
-    icon: '⏸',
-    color: 'text-gray-400',
   },
   completed: {
     label: '已完成',

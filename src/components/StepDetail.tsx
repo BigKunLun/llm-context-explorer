@@ -63,6 +63,7 @@ export function StepDetail({
       <div className="flex-1 overflow-auto mb-6">
         <ContextViewer
           messages={step.contextSnapshot}
+          newMessages={step.contextDiff}
           tokens={step.tokens}
           animate={animate}
         />

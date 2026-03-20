@@ -1,0 +1,102 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "ReAct Context Explorer" [level=1] [ref=e6]
+      - generic [ref=e7]:
+        - button "▶ 开始演示" [ref=e8]
+        - generic [ref=e10]:
+          - generic [ref=e11]: 选择场景
+          - combobox [ref=e12]:
+            - option "简单查天气" [selected]
+            - option "多工具协作"
+            - option "Token 颜色测试"
+          - paragraph [ref=e13]: 展示基础的 ReAct 循环：思考 → 行动 → 观察 → 回答
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - complementary [ref=e16]:
+        - generic [ref=e17]:
+          - 'button "#1 🧠 THOUGHT 分析用户请求 Tokens: 156" [ref=e18]':
+            - generic [ref=e20]: "#1"
+            - generic [ref=e22]: 🧠 THOUGHT
+            - generic [ref=e23]: 分析用户请求
+            - generic [ref=e25]: "Tokens: 156"
+            - img [ref=e27]
+          - 'button "#2 ⚡ ACTION 调用天气工具 Tokens: 234" [ref=e29]':
+            - generic [ref=e31]: "#2"
+            - generic [ref=e33]: ⚡ ACTION
+            - generic [ref=e34]: 调用天气工具
+            - generic [ref=e36]: "Tokens: 234"
+            - img [ref=e38]
+          - 'button "#3 👁️ OBSERVATION 获取天气结果 Tokens: 312" [ref=e40]':
+            - generic [ref=e42]: "#3"
+            - generic [ref=e44]: 👁️ OBSERVATION
+            - generic [ref=e45]: 获取天气结果
+            - generic [ref=e47]: "Tokens: 312"
+            - img [ref=e49]
+          - 'button "#4 💬 ANSWER 给出最终建议 Tokens: 423" [active] [ref=e51]':
+            - generic [ref=e54]: "#4"
+            - generic [ref=e56]: 💬 ANSWER
+            - generic [ref=e57]: 给出最终建议
+            - generic [ref=e59]: "Tokens: 423"
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - generic [ref=e65]: 💬 回答
+              - generic [ref=e66]: 步骤 4 / 4
+            - generic [ref=e67]: "Tokens: 423 / 4096"
+          - heading "给出最终建议" [level=2] [ref=e68]
+          - paragraph [ref=e69]: 综合天气信息，给出是否适合户外活动的建议
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - heading "当前上下文" [level=3] [ref=e73]
+            - generic [ref=e75]: "Tokens: 423 / 4096"
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - generic [ref=e81]: System
+              - generic [ref=e82]: 你是一个智能助手，可以帮助用户完成各种任务。当需要外部信息时，你可以使用提供的工具来获取。
+            - generic [ref=e83]:
+              - generic [ref=e85]: User
+              - generic [ref=e86]: 北京今天天气怎么样？适合户外活动吗？
+            - generic [ref=e87]:
+              - generic [ref=e89]: Assistant
+              - generic [ref=e90]: 用户想了解北京今天的天气情况，并询问是否适合户外活动。我需要使用天气工具来获取北京的实时天气信息。
+            - generic [ref=e91]:
+              - generic [ref=e93]: Tool Call
+              - generic [ref=e94]: get_weather(city="北京")
+            - generic [ref=e95]:
+              - generic [ref=e97]: Tool Result
+              - generic [ref=e98]: "{\"temp\": 15, \"weather\": \"晴\", \"humidity\": 45, \"wind\": \"微风\"}"
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - generic [ref=e101]: Assistant
+                - generic [ref=e102]: NEW
+              - generic [ref=e103]: 北京今天天气晴朗，气温15°C，湿度45%，微风。这样的天气非常适合户外活动！建议您可以进行散步、跑步或野餐等活动。记得适当添衣保暖。
+        - generic [ref=e104]:
+          - button "← 上一步" [ref=e105]
+          - button "下一步 →" [disabled] [ref=e111]
+  - generic [ref=e114]:
+    - generic [ref=e115]:
+      - slider "进度条" [ref=e116] [cursor=pointer]: "3"
+      - generic [ref=e117]:
+        - generic [ref=e118]: 步骤 4 / 4
+        - generic [ref=e119]: 100%
+    - generic [ref=e120]:
+      - generic [ref=e121]:
+        - button "上一步" [ref=e122]:
+          - img [ref=e123]
+        - button "播放" [ref=e125]:
+          - img [ref=e126]
+        - button "下一步" [disabled] [ref=e128]:
+          - img [ref=e129]
+      - generic [ref=e131]:
+        - generic [ref=e132]: "速度:"
+        - combobox "播放速度" [ref=e133] [cursor=pointer]:
+          - option "0.5x"
+          - option "1x" [selected]
+          - option "1.5x"
+          - option "2x"
+```

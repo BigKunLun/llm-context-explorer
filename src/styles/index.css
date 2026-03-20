@@ -28,18 +28,6 @@ body {
   }
 }
 
-/* 消息淡入动画 */
-@keyframes messageFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* 新消息高亮脉冲动画 */
 @keyframes highlightPulse {
   0% {

@@ -226,6 +226,69 @@ const scenario2Steps: Step[] = (() => {
   return steps;
 })();
 
+/**
+ * 场景3: Token 颜色测试 (3 steps)
+ * 测试 Token 进度条颜色切换：绿色 <=50%、黄色 50%-80%、红色 >80%
+ */
+const scenario3Steps: Step[] = (() => {
+  const steps: Step[] = [];
+  const TOKEN_LIMIT = 4096;
+
+  // Step 1: Token 使用 20% (绿色)
+  const step1Context: ContextMessage[] = [
+    { ...SYSTEM_MESSAGE },
+    { role: 'user', content: '开始测试' },
+  ];
+  steps.push({
+    id: 's3-step1',
+    type: 'THOUGHT',
+    title: '开始阶段（低 Token）',
+    description: 'Token 使用量约 20%，进度条应显示绿色',
+    contextSnapshot: step1Context,
+    contextDiff: [
+      { ...SYSTEM_MESSAGE, isNew: true },
+      { role: 'user', content: '开始测试', isNew: true },
+    ],
+    tokens: { used: 850, limit: TOKEN_LIMIT }, // ~20%
+  });
+
+  // Step 2: Token 使用 60% (黄色)
+  const step2Context: ContextMessage[] = [
+    ...step1Context,
+    { role: 'assistant', content: ' '.repeat(1000) + '中等 Token 使用量，进度条应显示黄色' + ' '.repeat(1000) },
+  ];
+  steps.push({
+    id: 's3-step2',
+    type: 'ACTION',
+    title: '中间阶段（中 Token）',
+    description: 'Token 使用量约 60%，进度条应显示黄色',
+    contextSnapshot: step2Context,
+    contextDiff: [
+      { role: 'assistant', content: ' '.repeat(1000) + '中等 Token 使用量，进度条应显示黄色' + ' '.repeat(1000), isNew: true },
+    ],
+    tokens: { used: 2450, limit: TOKEN_LIMIT }, // ~60%
+  });
+
+  // Step 3: Token 使用 90% (红色)
+  const step3Context: ContextMessage[] = [
+    ...step2Context,
+    { role: 'assistant', content: ' '.repeat(2000) + '高 Token 使用量，进度条应显示红色警告' + ' '.repeat(500) },
+  ];
+  steps.push({
+    id: 's3-step3',
+    type: 'ANSWER',
+    title: '接近极限（高 Token）',
+    description: 'Token 使用量约 90%，进度条应显示红色警告',
+    contextSnapshot: step3Context,
+    contextDiff: [
+      { role: 'assistant', content: ' '.repeat(2000) + '高 Token 使用量，进度条应显示红色警告' + ' '.repeat(500), isNew: true },
+    ],
+    tokens: { used: 3680, limit: TOKEN_LIMIT }, // ~90%
+  });
+
+  return steps;
+})();
+
 /** 预设场景列表 */
 export const scenarios: Scenario[] = [
   {
@@ -239,6 +302,12 @@ export const scenarios: Scenario[] = [
     name: '多工具协作',
     description: '展示 Agent 如何在多次工具调用间保持上下文，综合多个信息源给出建议',
     steps: scenario2Steps,
+  },
+  {
+    id: 'token-color-test',
+    name: 'Token 颜色测试',
+    description: '测试 Token 进度条颜色切换：绿色(≤50%)、黄色(50%-80%)、红色(>80%)',
+    steps: scenario3Steps,
   },
 ];
 

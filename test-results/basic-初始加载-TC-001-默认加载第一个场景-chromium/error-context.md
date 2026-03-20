@@ -1,0 +1,94 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "ReAct Context Explorer" [level=1] [ref=e6]
+      - generic [ref=e7]:
+        - button "▶ 开始演示" [ref=e8]
+        - generic [ref=e10]:
+          - generic [ref=e11]: 选择场景
+          - combobox [ref=e12]:
+            - option "简单查天气" [selected]
+            - option "多工具协作"
+            - option "Token 颜色测试"
+          - paragraph [ref=e13]: 展示基础的 ReAct 循环：思考 → 行动 → 观察 → 回答
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - complementary [ref=e16]:
+        - generic [ref=e17]:
+          - 'button "#1 🧠 THOUGHT 分析用户请求 Tokens: 156" [ref=e18]':
+            - generic [ref=e21]: "#1"
+            - generic [ref=e23]: 🧠 THOUGHT
+            - generic [ref=e24]: 分析用户请求
+            - generic [ref=e26]: "Tokens: 156"
+          - 'button "#2 ⚡ ACTION 调用天气工具 Tokens: 234" [ref=e27]':
+            - generic [ref=e29]: "#2"
+            - generic [ref=e31]: ⚡ ACTION
+            - generic [ref=e32]: 调用天气工具
+            - generic [ref=e34]: "Tokens: 234"
+          - 'button "#3 👁️ OBSERVATION 获取天气结果 Tokens: 312" [ref=e35]':
+            - generic [ref=e37]: "#3"
+            - generic [ref=e39]: 👁️ OBSERVATION
+            - generic [ref=e40]: 获取天气结果
+            - generic [ref=e42]: "Tokens: 312"
+          - 'button "#4 💬 ANSWER 给出最终建议 Tokens: 423" [ref=e43]':
+            - generic [ref=e45]: "#4"
+            - generic [ref=e47]: 💬 ANSWER
+            - generic [ref=e48]: 给出最终建议
+            - generic [ref=e50]: "Tokens: 423"
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: 🧠 思考
+              - generic [ref=e57]: 步骤 1 / 4
+            - generic [ref=e58]: "Tokens: 156 / 4096"
+          - heading "分析用户请求" [level=2] [ref=e59]
+          - paragraph [ref=e60]: 理解用户想查询北京天气，判断需要调用天气工具
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - heading "当前上下文" [level=3] [ref=e64]
+            - generic [ref=e66]: "Tokens: 156 / 4096"
+          - generic [ref=e69]:
+            - generic [ref=e70]:
+              - generic [ref=e71]:
+                - generic [ref=e72]: System
+                - generic [ref=e73]: NEW
+              - generic [ref=e74]: 你是一个智能助手，可以帮助用户完成各种任务。当需要外部信息时，你可以使用提供的工具来获取。
+            - generic [ref=e75]:
+              - generic [ref=e76]:
+                - generic [ref=e77]: User
+                - generic [ref=e78]: NEW
+              - generic [ref=e79]: 北京今天天气怎么样？适合户外活动吗？
+            - generic [ref=e80]:
+              - generic [ref=e81]:
+                - generic [ref=e82]: Assistant
+                - generic [ref=e83]: NEW
+              - generic [ref=e84]: 用户想了解北京今天的天气情况，并询问是否适合户外活动。我需要使用天气工具来获取北京的实时天气信息。
+        - generic [ref=e85]:
+          - button "← 上一步" [disabled] [ref=e86]
+          - button "下一步 →" [ref=e92]
+  - generic [ref=e95]:
+    - generic [ref=e96]:
+      - slider "进度条" [ref=e97] [cursor=pointer]: "0"
+      - generic [ref=e98]:
+        - generic [ref=e99]: 步骤 1 / 4
+        - generic [ref=e100]: 25%
+    - generic [ref=e101]:
+      - generic [ref=e102]:
+        - button "上一步" [disabled] [ref=e103]:
+          - img [ref=e104]
+        - button "播放" [ref=e106]:
+          - img [ref=e107]
+        - button "下一步" [ref=e109]:
+          - img [ref=e110]
+      - generic [ref=e112]:
+        - generic [ref=e113]: "速度:"
+        - combobox "播放速度" [ref=e114] [cursor=pointer]:
+          - option "0.5x"
+          - option "1x" [selected]
+          - option "1.5x"
+          - option "2x"
+```
