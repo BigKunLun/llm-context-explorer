@@ -1,4 +1,5 @@
 // src/components/StepDetail.tsx
+import { useState } from 'react';
 import type { Step } from '../types';
 import { STEP_TYPE_STYLES } from '../constants/stepStyles';
 import { ContextViewer } from './ContextViewer';
@@ -24,6 +25,7 @@ export function StepDetail({
   animate = true,
   hideNav = false,
 }: StepDetailProps) {
+  const [viewMode, setViewMode] = useState<'snapshot' | 'diff'>('snapshot');
   const style = STEP_TYPE_STYLES[step.type];
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === totalSteps - 1;
@@ -59,11 +61,39 @@ export function StepDetail({
         </p>
       </div>
 
+      {/* 视图模式切换 */}
+      <div className="flex mb-4">
+        <div className="inline-flex rounded-lg bg-gray-800 p-1">
+          <button
+            type="button"
+            onClick={() => setViewMode('snapshot')}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'snapshot'
+                ? 'bg-gray-700 text-white'
+                : 'text-gray-400 hover:text-gray-300'
+            }`}
+          >
+            完整快照
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('diff')}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'diff'
+                ? 'bg-gray-700 text-white'
+                : 'text-gray-400 hover:text-gray-300'
+            }`}
+          >
+            增量变化
+          </button>
+        </div>
+      </div>
+
       {/* 上下文快照 */}
       <div className="flex-1 overflow-auto mb-6">
         <ContextViewer
-          messages={step.contextSnapshot}
-          newMessages={step.contextDiff}
+          messages={viewMode === 'snapshot' ? step.contextSnapshot : step.contextDiff}
+          newMessages={viewMode === 'snapshot' ? step.contextDiff : step.contextDiff}
           tokens={step.tokens}
           animate={animate}
         />
