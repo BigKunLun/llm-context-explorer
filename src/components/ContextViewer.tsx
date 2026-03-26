@@ -80,6 +80,7 @@ export function ContextViewer({
       <div
         ref={containerRef}
         className={`
+          max-h-[60vh] overflow-y-auto
           bg-gray-800/50 rounded-lg border border-gray-700 divide-y divide-gray-700/50
           ${animate ? 'smooth-scroll' : ''}
         `}
