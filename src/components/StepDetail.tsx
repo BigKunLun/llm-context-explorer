@@ -1,5 +1,4 @@
 // src/components/StepDetail.tsx
-import { useState } from 'react';
 import type { Step } from '../types';
 import { STEP_TYPE_STYLES } from '../constants/stepStyles';
 import { ContextViewer } from './ContextViewer';
@@ -14,6 +13,10 @@ interface StepDetailProps {
   animate?: boolean;
   /** 是否隐藏导航栏（播放模式时） */
   hideNav?: boolean;
+  /** 视图模式 */
+  viewMode: 'snapshot' | 'diff';
+  /** 视图模式变更回调 */
+  onViewModeChange: (mode: 'snapshot' | 'diff') => void;
 }
 
 export function StepDetail({
@@ -24,8 +27,9 @@ export function StepDetail({
   onNext,
   animate = true,
   hideNav = false,
+  viewMode,
+  onViewModeChange,
 }: StepDetailProps) {
-  const [viewMode, setViewMode] = useState<'snapshot' | 'diff'>('snapshot');
   const style = STEP_TYPE_STYLES[step.type];
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === totalSteps - 1;
@@ -68,7 +72,7 @@ export function StepDetail({
             type="button"
             role="tab"
             aria-selected={viewMode === 'snapshot'}
-            onClick={() => setViewMode('snapshot')}
+            onClick={() => onViewModeChange('snapshot')}
             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               viewMode === 'snapshot'
                 ? 'bg-gray-700 text-white'
@@ -81,7 +85,7 @@ export function StepDetail({
             type="button"
             role="tab"
             aria-selected={viewMode === 'diff'}
-            onClick={() => setViewMode('diff')}
+            onClick={() => onViewModeChange('diff')}
             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               viewMode === 'diff'
                 ? 'bg-gray-700 text-white'

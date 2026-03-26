@@ -5,6 +5,7 @@ import { Timeline } from './components/Timeline';
 import { StepDetail } from './components/StepDetail';
 import { AgentStatusBar } from './components/AgentStatusBar';
 import { PlaybackBar } from './components/PlaybackBar';
+import { STEP_TYPE_STYLES } from './constants/stepStyles';
 import type { PlaybackSpeed, AgentStatus, AgentState, PlaybackState, StepType } from './types';
 
 /** 播放速度对应的毫秒间隔 */
@@ -29,6 +30,7 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState<PlaybackSpeed>(1);
   const [showCompletion, setShowCompletion] = useState(false);
+  const [viewMode, setViewMode] = useState<'snapshot' | 'diff'>('snapshot');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentScenario = useMemo(() => getScenarioById(scenarioId), [scenarioId]);
@@ -217,7 +219,20 @@ function App() {
               <h2 className="text-white font-medium">{currentScenario.name}</h2>
               <p className="text-sm text-gray-400 mt-1">{currentScenario.description}</p>
             </div>
-            <span className="text-sm text-gray-500">共 {totalSteps} 步</span>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-3 text-xs">
+                {(Object.keys(STEP_TYPE_STYLES) as Array<keyof typeof STEP_TYPE_STYLES>).map((type) => {
+                  const s = STEP_TYPE_STYLES[type];
+                  return (
+                    <span key={type} className={`inline-flex items-center gap-1 ${s.text}`}>
+                      <span>{s.icon}</span>
+                      <span>{s.label}</span>
+                    </span>
+                  );
+                })}
+              </div>
+              <span className="text-sm text-gray-500">共 {totalSteps} 步</span>
+            </div>
           </div>
         </div>
 
@@ -244,6 +259,8 @@ function App() {
               onPrev={handlePrev}
               onNext={handleNext}
               hideNav={isPlaying}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
             />
           </section>
         </div>

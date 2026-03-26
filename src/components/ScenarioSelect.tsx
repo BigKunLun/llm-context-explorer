@@ -8,10 +8,8 @@ interface ScenarioSelectProps {
 }
 
 export function ScenarioSelect({ scenarios, currentId, onChange }: ScenarioSelectProps) {
-  const current = scenarios.find(s => s.id === currentId);
-
   return (
-    <div className="mb-6">
+    <div>
       <label className="block text-sm font-medium text-gray-400 mb-2">
         选择场景
       </label>
@@ -26,11 +24,6 @@ export function ScenarioSelect({ scenarios, currentId, onChange }: ScenarioSelec
           </option>
         ))}
       </select>
-      {current?.description && (
-        <p className="mt-2 text-sm text-gray-500">
-          {current.description}
-        </p>
-      )}
     </div>
   );
 }
