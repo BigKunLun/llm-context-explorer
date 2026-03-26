@@ -63,9 +63,11 @@ export function StepDetail({
 
       {/* 视图模式切换 */}
       <div className="flex mb-4">
-        <div className="inline-flex rounded-lg bg-gray-800 p-1">
+        <div className="inline-flex rounded-lg bg-gray-800 p-1" role="tablist">
           <button
             type="button"
+            role="tab"
+            aria-selected={viewMode === 'snapshot'}
             onClick={() => setViewMode('snapshot')}
             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               viewMode === 'snapshot'
@@ -77,6 +79,8 @@ export function StepDetail({
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={viewMode === 'diff'}
             onClick={() => setViewMode('diff')}
             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               viewMode === 'diff'
@@ -90,7 +94,7 @@ export function StepDetail({
       </div>
 
       {/* 上下文快照 */}
-      <div className="flex-1 overflow-auto mb-6">
+      <div className="flex-1 overflow-auto mb-6" role="tabpanel">
         <ContextViewer
           messages={viewMode === 'snapshot' ? step.contextSnapshot : step.contextDiff}
           newMessages={viewMode === 'snapshot' ? step.contextDiff : step.contextDiff}
