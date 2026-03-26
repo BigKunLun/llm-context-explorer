@@ -86,7 +86,7 @@ export function ContextViewer({
       >
         {messages.map((msg, index) => {
           const roleStyle = roleLabels[msg.role];
-          const isNew = isNewMessage(msg, index);
+          const isNew = isNewMessage(msg);
           return (
             <div
               key={index}

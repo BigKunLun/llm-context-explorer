@@ -36,3 +36,8 @@ coverage
 
 # Git worktrees
 .worktrees
+
+# Auto Loop
+auto-loop-state.md
+auto-loop-log.md
+.auto-loop-off
