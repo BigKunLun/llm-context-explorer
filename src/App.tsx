@@ -206,6 +206,7 @@ function App() {
           {/* Right: Step Detail */}
           <section className="flex-1 min-w-0">
             <StepDetail
+              key={currentStep.id}
               step={currentStep}
               stepIndex={stepIndex}
               totalSteps={totalSteps}
