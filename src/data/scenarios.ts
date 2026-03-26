@@ -255,7 +255,7 @@ const scenario3Steps: Step[] = (() => {
   // Step 2: Token 使用 60% (黄色)
   const step2Context: ContextMessage[] = [
     ...step1Context,
-    { role: 'assistant', content: ' '.repeat(1000) + '中等 Token 使用量，进度条应显示黄色' + ' '.repeat(1000) },
+    { role: 'assistant', content: '[模拟中等长度的 LLM 输出] 当前 Token 使用量约 60%，进度条应显示黄色。这段文本用于演示上下文窗口逐渐填满的过程。' },
   ];
   steps.push({
     id: 's3-step2',
@@ -264,7 +264,7 @@ const scenario3Steps: Step[] = (() => {
     description: 'Token 使用量约 60%，进度条应显示黄色',
     contextSnapshot: step2Context,
     contextDiff: [
-      { role: 'assistant', content: ' '.repeat(1000) + '中等 Token 使用量，进度条应显示黄色' + ' '.repeat(1000), isNew: true },
+      { role: 'assistant', content: '[模拟中等长度的 LLM 输出] 当前 Token 使用量约 60%，进度条应显示黄色。这段文本用于演示上下文窗口逐渐填满的过程。', isNew: true },
     ],
     tokens: { used: 2450, limit: TOKEN_LIMIT }, // ~60%
   });
@@ -272,7 +272,7 @@ const scenario3Steps: Step[] = (() => {
   // Step 3: Token 使用 90% (红色)
   const step3Context: ContextMessage[] = [
     ...step2Context,
-    { role: 'assistant', content: ' '.repeat(2000) + '高 Token 使用量，进度条应显示红色警告' + ' '.repeat(500) },
+    { role: 'assistant', content: '[模拟大量 LLM 输出] 当前 Token 使用量约 90%，进度条应显示红色警告。接近上下文窗口限制时，Agent 需要考虑裁剪策略。' },
   ];
   steps.push({
     id: 's3-step3',
@@ -281,7 +281,7 @@ const scenario3Steps: Step[] = (() => {
     description: 'Token 使用量约 90%，进度条应显示红色警告',
     contextSnapshot: step3Context,
     contextDiff: [
-      { role: 'assistant', content: ' '.repeat(2000) + '高 Token 使用量，进度条应显示红色警告' + ' '.repeat(500), isNew: true },
+      { role: 'assistant', content: '[模拟大量 LLM 输出] 当前 Token 使用量约 90%，进度条应显示红色警告。接近上下文窗口限制时，Agent 需要考虑裁剪策略。', isNew: true },
     ],
     tokens: { used: 3680, limit: TOKEN_LIMIT }, // ~90%
   });
