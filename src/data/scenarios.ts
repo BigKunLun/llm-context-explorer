@@ -289,6 +289,122 @@ const scenario3Steps: Step[] = (() => {
   return steps;
 })();
 
+/**
+ * 场景4: 代码调试 (6 steps)
+ * 展示 Agent 如何通过 ReAct 循环定位和修复一个 Python bug
+ */
+const scenario4Steps: Step[] = (() => {
+  const steps: Step[] = [];
+  const TOKEN_LIMIT = 8192;
+
+  // Step 1: THOUGHT - 分析用户报告的错误
+  const step1Context: ContextMessage[] = [
+    { ...SYSTEM_MESSAGE },
+    { role: 'user', content: '我的 Python 脚本报错 IndexError: list index out of range，脚本文件是 data_processor.py，麻烦帮我看看是什么问题。' },
+    { role: 'assistant', content: '用户报告了一个 IndexError，这通常是访问了列表中不存在的索引位置。我需要先查看 data_processor.py 的源代码，找到触发 IndexError 的具体位置，再分析根因。' },
+  ];
+  steps.push({
+    id: 's4-step1',
+    type: 'THOUGHT',
+    title: '分析错误报告',
+    description: '理解用户报告的 IndexError，判断需要查看源代码定位问题',
+    contextSnapshot: step1Context,
+    contextDiff: [
+      { ...SYSTEM_MESSAGE, isNew: true },
+      { role: 'user', content: '我的 Python 脚本报错 IndexError: list index out of range，脚本文件是 data_processor.py，麻烦帮我看看是什么问题。', isNew: true },
+      { role: 'assistant', content: '用户报告了一个 IndexError，这通常是访问了列表中不存在的索引位置。我需要先查看 data_processor.py 的源代码，找到触发 IndexError 的具体位置，再分析根因。', isNew: true },
+    ],
+    tokens: { used: 200, limit: TOKEN_LIMIT },
+  });
+
+  // Step 2: ACTION - 调用 read_file 工具查看代码
+  const step2Context: ContextMessage[] = [
+    ...step1Context,
+    { role: 'tool_call', content: 'read_file(path="data_processor.py")' },
+  ];
+  steps.push({
+    id: 's4-step2',
+    type: 'ACTION',
+    title: '读取源代码',
+    description: '使用 read_file 工具查看 data_processor.py 的内容',
+    contextSnapshot: step2Context,
+    contextDiff: [
+      { role: 'tool_call', content: 'read_file(path="data_processor.py")', isNew: true },
+    ],
+    tokens: { used: 380, limit: TOKEN_LIMIT },
+  });
+
+  // Step 3: OBSERVATION - 看到代码中对空列表做了索引操作
+  const step3Context: ContextMessage[] = [
+    ...step2Context,
+    { role: 'tool_result', content: 'def process_data(file_path):\n    data = []\n    with open(file_path, "r") as f:\n        for line in f:\n            if line.strip():\n                data.append(line.strip())\n    first_item = data[0]  # line 7\n    return {\"first\": first_item, \"count\": len(data)}' },
+  ];
+  steps.push({
+    id: 's4-step3',
+    type: 'OBSERVATION',
+    title: '查看代码内容',
+    description: '发现第 7 行直接使用 data[0] 访问列表，未检查列表是否为空',
+    contextSnapshot: step3Context,
+    contextDiff: [
+      { role: 'tool_result', content: 'def process_data(file_path):\n    data = []\n    with open(file_path, "r") as f:\n        for line in f:\n            if line.strip():\n                data.append(line.strip())\n    first_item = data[0]  # line 7\n    return {\"first\": first_item, \"count\": len(data)}', isNew: true },
+    ],
+    tokens: { used: 520, limit: TOKEN_LIMIT },
+  });
+
+  // Step 4: THOUGHT - 分析根因
+  const step4Context: ContextMessage[] = [
+    ...step3Context,
+    { role: 'assistant', content: '找到根因了。第 7 行 `first_item = data[0]` 直接对 data 列表做索引访问，但如果输入文件为空或所有行都是空白行，data 列表就会是空的，此时 data[0] 会抛出 IndexError。修复方案：在访问 data[0] 前添加空列表检查，如果列表为空则返回合理的默认值。' },
+  ];
+  steps.push({
+    id: 's4-step4',
+    type: 'THOUGHT',
+    title: '定位根因',
+    description: '确认根因：未检查列表是否为空就直接访问 data[0]',
+    contextSnapshot: step4Context,
+    contextDiff: [
+      { role: 'assistant', content: '找到根因了。第 7 行 `first_item = data[0]` 直接对 data 列表做索引访问，但如果输入文件为空或所有行都是空白行，data 列表就会是空的，此时 data[0] 会抛出 IndexError。修复方案：在访问 data[0] 前添加空列表检查，如果列表为空则返回合理的默认值。', isNew: true },
+    ],
+    tokens: { used: 650, limit: TOKEN_LIMIT },
+  });
+
+  // Step 5: ACTION - 调用 edit_file 工具添加空列表检查
+  const step5Context: ContextMessage[] = [
+    ...step4Context,
+    { role: 'tool_call', content: 'edit_file(path="data_processor.py", old_str="    first_item = data[0]  # line 7\\n    return {\\"first\\": first_item, \\"count\\": len(data)}", new_str="    if not data:\\n        return {\\"first\\": None, \\"count\\": 0}\\n    first_item = data[0]\\n    return {\\"first\\": first_item, \\"count\\": len(data)}")' },
+  ];
+  steps.push({
+    id: 's4-step5',
+    type: 'ACTION',
+    title: '修复代码',
+    description: '使用 edit_file 工具在 data[0] 前添加空列表检查',
+    contextSnapshot: step5Context,
+    contextDiff: [
+      { role: 'tool_call', content: 'edit_file(path="data_processor.py", old_str="    first_item = data[0]  # line 7\\n    return {\\"first\\": first_item, \\"count\\": len(data)}", new_str="    if not data:\\n        return {\\"first\\": None, \\"count\\": 0}\\n    first_item = data[0]\\n    return {\\"first\\": first_item, \\"count\\": len(data)}")', isNew: true },
+    ],
+    tokens: { used: 820, limit: TOKEN_LIMIT },
+  });
+
+  // Step 6: ANSWER - 解释修复内容和根因
+  const step6Context: ContextMessage[] = [
+    ...step5Context,
+    { role: 'assistant', content: '已修复 data_processor.py 中的 IndexError。\n\n根因分析：\n函数 process_data() 在第 7 行直接使用 data[0] 获取第一个元素，但当输入文件为空或所有行都是空白时，data 列表为空，导致 IndexError。\n\n修复内容：\n在访问 data[0] 前增加了空列表检查 `if not data`，当列表为空时直接返回 {\"first\": None, \"count\": 0}，避免越界访问。\n\n建议：在处理外部输入数据时，始终对集合做非空校验后再访问元素，这是防御性编程的基本实践。' },
+  ];
+  steps.push({
+    id: 's4-step6',
+    type: 'ANSWER',
+    title: '总结修复方案',
+    description: '解释根因（空列表未检查）和修复方案（添加 if not data 防御性检查）',
+    contextSnapshot: step6Context,
+    contextDiff: [
+      { role: 'assistant', content: '已修复 data_processor.py 中的 IndexError。\n\n根因分析：\n函数 process_data() 在第 7 行直接使用 data[0] 获取第一个元素，但当输入文件为空或所有行都是空白时，data 列表为空，导致 IndexError。\n\n修复内容：\n在访问 data[0] 前增加了空列表检查 `if not data`，当列表为空时直接返回 {\"first\": None, \"count\": 0}，避免越界访问。\n\n建议：在处理外部输入数据时，始终对集合做非空校验后再访问元素，这是防御性编程的基本实践。', isNew: true },
+    ],
+    tokens: { used: 980, limit: TOKEN_LIMIT },
+  });
+
+  return steps;
+})();
+
 /** 预设场景列表 */
 export const scenarios: Scenario[] = [
   {
@@ -308,6 +424,12 @@ export const scenarios: Scenario[] = [
     name: 'Token 颜色测试',
     description: '测试 Token 进度条颜色切换：绿色(≤50%)、黄色(50%-80%)、红色(>80%)',
     steps: scenario3Steps,
+  },
+  {
+    id: 'code-debug',
+    name: '代码调试',
+    description: '展示 Agent 如何通过 ReAct 循环定位和修复一个 Python IndexError bug',
+    steps: scenario4Steps,
   },
 ];
 
