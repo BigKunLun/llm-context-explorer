@@ -185,6 +185,20 @@ body {
   transform: translateY(0);
 }
 
+/* ==================== 完成提示动画 ==================== */
+
+/* 完成提示淡入淡出动画 */
+@keyframes completionFadeIn {
+  0% { opacity: 0; transform: translateY(-8px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.completion-banner {
+  animation: completionFadeIn 3s ease-out forwards;
+}
+
 /* 禁用动画 */
 .animation-none {
   animation: none !important;

@@ -28,6 +28,7 @@ function App() {
   const [stepIndex, setStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState<PlaybackSpeed>(1);
+  const [showCompletion, setShowCompletion] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentScenario = useMemo(() => getScenarioById(scenarioId), [scenarioId]);
@@ -66,9 +67,10 @@ function App() {
   useEffect(() => {
     if (!isPlaying || !currentScenario) return;
 
-    // 到达最后一步，停止
+    // 到达最后一步，停止并显示完成提示
     if (stepIndex >= currentScenario.steps.length - 1) {
       setIsPlaying(false);
+      setShowCompletion(true);
       return;
     }
 
@@ -81,10 +83,18 @@ function App() {
     };
   }, [isPlaying, stepIndex, speed, currentScenario]);
 
+  // 完成提示 3 秒后自动隐藏
+  useEffect(() => {
+    if (!showCompletion) return;
+    const timer = setTimeout(() => setShowCompletion(false), 3000);
+    return () => clearTimeout(timer);
+  }, [showCompletion]);
+
   const handleScenarioChange = useCallback((id: string) => {
     stopPlayback();
     setScenarioId(id);
     setStepIndex(0);
+    setShowCompletion(false);
   }, [stopPlayback]);
 
   const handleStepSelect = useCallback((index: number) => {
@@ -186,6 +196,16 @@ function App() {
           currentStepTitle={currentStep.title}
           compact
         />
+      )}
+
+      {/* 完成提示条 */}
+      {showCompletion && (
+        <div className="mx-auto max-w-7xl px-4 py-3">
+          <div className="completion-banner flex items-center justify-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm">
+            <span>✓</span>
+            <span>演示完成！共 {totalSteps} 个步骤</span>
+          </div>
+        </div>
       )}
 
       {/* Main Content */}
