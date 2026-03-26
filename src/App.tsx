@@ -190,6 +190,17 @@ function App() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">
+        {/* 场景信息条 */}
+        <div className="mb-4 px-4 py-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-white font-medium">{currentScenario.name}</h2>
+              <p className="text-sm text-gray-400 mt-1">{currentScenario.description}</p>
+            </div>
+            <span className="text-sm text-gray-500">共 {totalSteps} 步</span>
+          </div>
+        </div>
+
         <div className="flex gap-6 h-[calc(100vh-240px)]">
           {/* Left: Timeline */}
           <aside className="w-72 flex-shrink-0">
