@@ -63,6 +63,18 @@ export function Timeline({
 
   return (
     <div className="h-full overflow-y-auto pr-2 smooth-scroll">
+      {/* 步骤类型图例 */}
+      <div className="flex flex-wrap gap-x-3 gap-y-1 px-2 py-1.5 mb-2 bg-gray-800/30 rounded-lg text-xs">
+        {(Object.keys(STEP_TYPE_STYLES) as Array<keyof typeof STEP_TYPE_STYLES>).map((type) => {
+          const s = STEP_TYPE_STYLES[type];
+          return (
+            <span key={type} className={`inline-flex items-center gap-1 ${s.text}`}>
+              <span>{s.icon}</span>
+              <span>{s.label}</span>
+            </span>
+          );
+        })}
+      </div>
       {steps.map((step, index) => {
         const isActive = index === currentIndex;
         const isCompleted = index < currentIndex;
