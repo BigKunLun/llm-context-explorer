@@ -1,4 +1,5 @@
 // src/components/Timeline.tsx
+import { useRef, useEffect, useCallback } from 'react';
 import type { Step, PlaybackMode } from '../types';
 import { STEP_TYPE_STYLES } from '../constants/stepStyles';
 import { StepCard } from './StepCard';
@@ -29,6 +30,25 @@ export function Timeline({
   onPlaybackStop,
   animate = true,
 }: TimelineProps) {
+  /** 步骤元素的 ref 数组，用于自动滚动 */
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  /** 设置步骤元素 ref 的回调 */
+  const setStepRef = useCallback(
+    (index: number) => (el: HTMLDivElement | null) => {
+      stepRefs.current[index] = el;
+    },
+    [],
+  );
+
+  /** 当 currentIndex 变化时，自动滚动到当前步骤 */
+  useEffect(() => {
+    const currentEl = stepRefs.current[currentIndex];
+    if (currentEl) {
+      currentEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [currentIndex]);
+
   /** 是否处于播放模式 */
   const isPlaybackMode = playbackMode === 'play' && isPlaybackActive;
 
@@ -60,7 +80,7 @@ export function Timeline({
         const lineColor = isCompleted ? 'bg-blue-500/50' : 'bg-gray-700';
 
         return (
-          <div key={step.id} className="relative flex items-stretch">
+          <div key={step.id} ref={setStepRef(index)} className="relative flex items-stretch">
             {/* 左侧轨道：圆点 + 连接线 */}
             <div className="flex flex-col items-center mr-3 pt-4">
               {/* 圆点指示器 */}
