@@ -63,15 +63,23 @@ export function ContextViewer({
         </h3>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-400">
-            Tokens: <span className="text-white font-mono">{tokens.used}</span> / {tokens.limit}
+            Tokens: <span className="text-white font-mono">{tokens.used}</span> / {tokens.limit}{' '}
+            <span className="text-gray-500">({Math.round(tokenPercentage)}%)</span>
           </span>
-          <div className="w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
+          <div className="relative w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
             <div
               className={`h-full token-progress-bar ${
-                tokenPercentage > 80 ? 'bg-red-500' : tokenPercentage > 50 ? 'bg-yellow-500' : 'bg-green-500'
+                tokenPercentage > 80
+                  ? 'bg-gradient-to-r from-red-500 to-red-400'
+                  : tokenPercentage > 50
+                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+                    : 'bg-gradient-to-r from-green-500 to-green-400'
               }`}
               style={{ width: `${Math.min(tokenPercentage, 100)}%` }}
             />
+            {/* 分界标记：50% 和 80% */}
+            <div className="absolute top-0 left-1/2 w-px h-full bg-gray-500/50" />
+            <div className="absolute top-0 left-[80%] w-px h-full bg-gray-500/50" />
           </div>
         </div>
       </div>
