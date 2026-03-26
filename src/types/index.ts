@@ -82,30 +82,36 @@ export const AGENT_STATUS_CONFIG = {
     label: '空闲',
     icon: '●',
     color: 'text-gray-400',
+    bgColor: 'bg-gray-400',
   },
   thinking: {
     label: '思考中',
     icon: '◉',
     color: 'text-blue-400',
+    bgColor: 'bg-blue-400',
   },
   acting: {
     label: '执行中',
     icon: '◉',
     color: 'text-amber-400',
+    bgColor: 'bg-amber-400',
   },
   observing: {
     label: '观察中',
     icon: '◉',
     color: 'text-teal-400',
+    bgColor: 'bg-teal-400',
   },
   answering: {
     label: '回答中',
     icon: '◉',
     color: 'text-green-400',
+    bgColor: 'bg-green-400',
   },
   completed: {
     label: '已完成',
     icon: '✓',
     color: 'text-green-500',
+    bgColor: 'bg-green-500',
   },
-} as const satisfies Record<AgentStatus, { label: string; icon: string; color: string }>;
+} as const satisfies Record<AgentStatus, { label: string; icon: string; color: string; bgColor: string }>;

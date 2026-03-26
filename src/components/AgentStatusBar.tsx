@@ -79,7 +79,7 @@ export function AgentStatusBar({
             <div
               className={`
                 h-full transition-all duration-300
-                ${status === 'completed' ? 'bg-green-500' : config.color}
+                ${status === 'completed' ? 'bg-green-500' : config.bgColor}
               `}
               style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
             />
