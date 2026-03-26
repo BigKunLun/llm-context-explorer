@@ -109,6 +109,31 @@ function App() {
     setStepIndex(prev => Math.min(totalSteps - 1, prev + 1));
   }, [stopPlayback, totalSteps]);
 
+  // 键盘快捷键：← 上一步, → 下一步, 空格 播放/暂停
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 忽略在 input/select 等表单元素中的按键
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          handlePrev();
+          break;
+        case 'ArrowRight':
+          handleNext();
+          break;
+        case ' ':
+          e.preventDefault(); // 防止空格滚动页面
+          handleTogglePlay();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePrev, handleNext, handleTogglePlay]);
+
   const handleSeek = useCallback((index: number) => {
     stopPlayback();
     setStepIndex(index);
